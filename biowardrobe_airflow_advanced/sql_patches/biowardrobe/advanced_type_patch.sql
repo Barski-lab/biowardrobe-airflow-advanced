@@ -1,6 +1,6 @@
 # DESeq
-INSERT IGNORE INTO `ems`.`advancedtype` SELECT NULL, 'deseq', '', '', '','';
-UPDATE `ems`.`plugintype` SET
+INSERT IGNORE INTO `ems`.`advancedtype` SELECT NULL, 'deseq', '', '', '', '', '', '', '';
+UPDATE `ems`.`advancedtype` SET
   workflow='deseq-biowardrobe-only.cwl',
   template='{{
     "untreated_files": {untreated_files},
