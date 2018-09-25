@@ -1,0 +1,4 @@
+include biowardrobe_airflow_advanced/.git_version
+include biowardrobe_airflow_advanced/sql_patches/biowardrobe/*.sql
+include biowardrobe_airflow_advanced/cwls/*.cwl
+
