@@ -15,5 +15,5 @@ class DeseqJobDispatcher(CWLJobDispatcher):
             return self.cwl_dispatch(conf['job'])
         except KeyError:
             workflow = os.path.basename(self.dag.cwl_workflow)
-            return self.cwl_dispatch(get_deseq_job(conf, workflow))
+            return self.cwl_dispatch(get_deseq_job(conf))
 

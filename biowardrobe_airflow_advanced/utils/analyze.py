@@ -44,7 +44,7 @@ def get_settings_data():
     return settings_data
 
 
-def get_deseq_job(conf, workflow):
+def get_deseq_job(conf):
     logger.debug(f"Collecting data for genelists:\n"
                  f"  untreated -  {conf['condition'][0]}\n"
                  f"  treated -    {conf['condition'][1]}\n"
@@ -60,6 +60,7 @@ def get_deseq_job(conf, workflow):
         "uid": conf['result_uid']}
     connect_db = HookConnect()
     for idx, uid in enumerate(conf['condition']):
+        logger.debug(f"Get experiment ids for {uid}")
         sql_query = f"SELECT tableName FROM genelist WHERE leaf=1 AND (parent_id like '{uid}' OR id like '{uid}')"
         file_template = '{{"class": "File", "location": "{outputs[rpkm_isoforms][location]}", "format": "http://edamontology.org/format_3752"}}'
         for record in connect_db.fetchall(sql_query):
