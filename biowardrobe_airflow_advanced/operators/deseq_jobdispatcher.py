@@ -1,6 +1,6 @@
 import os
 from cwl_airflow_parser import CWLJobDispatcher
-from biowardrobe_airflow_advanced.utils.analyze import get_advanced_data
+from biowardrobe_airflow_advanced.utils.analyze import get_deseq_job
 
 
 class DeseqJobDispatcher(CWLJobDispatcher):
@@ -15,5 +15,5 @@ class DeseqJobDispatcher(CWLJobDispatcher):
             return self.cwl_dispatch(conf['job'])
         except KeyError:
             workflow = os.path.basename(self.dag.cwl_workflow)
-            return self.cwl_dispatch(get_advanced_data(conf, workflow)['advanced'][workflow]['job'])
+            return self.cwl_dispatch(get_deseq_job(conf, workflow))
 

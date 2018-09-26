@@ -2,11 +2,9 @@
 import logging
 import decimal
 import os
-import re
 from json import dumps, loads
 from biowardrobe_airflow_plugins.utils.connect import HookConnect
 from biowardrobe_airflow_plugins.utils.func import (norm_path, fill_template)
-from biowardrobe_airflow_plugins.utils.upload import process_results
 
 
 logger = logging.getLogger(__name__)
@@ -46,33 +44,29 @@ def get_settings_data():
     return settings_data
 
 
-def get_advanced_data(conf, workflow):
-    # WARNING: will fail if not DESeq workflow. Should be updated, once new workflows added
+def get_deseq_job(conf, workflow):
     logger.debug(f"Collecting data for genelists:\n"
                  f"  untreated -  {conf['condition'][0]}\n"
                  f"  treated -    {conf['condition'][1]}\n"
                  f"  groupby -    {conf['groupby']}\n"
                  f"  result_uid - {conf['result_uid']}")
+    setting_data = get_settings_data()
+    job = {
+        "untreated_files": [],
+        "treated_files": [],
+        "output_filename": conf['result_uid'] + "_deseq.tsv",
+        "threads": setting_data["threads"],
+        "output_folder": os.path.join(setting_data["anl_data"], conf['result_uid']),
+        "uid": conf['result_uid']}
     connect_db = HookConnect()
-    job_data = {"untreated_files": [],
-                "treated_files": [],
-                "uid": conf['result_uid']}
     for idx, uid in enumerate(conf['condition']):
         sql_query = f"SELECT tableName FROM genelist WHERE leaf=1 AND (parent_id like '{uid}' OR id like '{uid}')"
         file_template = '{{"class": "File", "location": "{outputs[rpkm_isoforms][location]}", "format": "http://edamontology.org/format_3752"}}'
         for record in connect_db.fetchall(sql_query):
             exp_data = get_exp_data(record["tableName"])
             if idx == 0:
-                job_data["untreated_files"].append(fill_template(file_template, exp_data))
+                job["untreated_files"].append(fill_template(file_template, exp_data))
             else:
-                job_data["treated_files"].append(fill_template(file_template, exp_data))
-    job_data.update(get_settings_data())
-    job_data.update({"advanced": {adv_exp['workflow']: {'id':           adv_exp['id'],
-                                                        'atype':        adv_exp['atype'],
-                                                        'etype_id':     adv_exp['etype_id'],
-                                                        'pool':         adv_exp['pool'],
-                                                        'job':          fill_template(adv_exp['template'], job_data),
-                                                        'upload_rules': fill_template(adv_exp['upload_rules'], job_data)}
-                                  for adv_exp in connect_db.fetchall(f"SELECT * FROM advancedtype WHERE workflow='{workflow}'")}})
-    return job_data
+                job["treated_files"].append(fill_template(file_template, exp_data))
+    return job
 
