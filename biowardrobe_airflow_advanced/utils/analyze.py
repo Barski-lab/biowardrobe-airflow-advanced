@@ -55,7 +55,7 @@ def get_deseq_job(conf):
         "untreated_files": [],
         "treated_files": [],
         "output_filename": conf['result_uid'] + "_deseq.tsv",
-        "threads": setting_data["threads"],
+        "threads": int(setting_data["threads"]),
         "output_folder": os.path.join(setting_data["anl_data"], conf['result_uid']),
         "uid": conf['result_uid']}
     connect_db = HookConnect()
