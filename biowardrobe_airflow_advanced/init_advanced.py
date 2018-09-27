@@ -38,7 +38,7 @@ from biowardrobe_airflow_advanced import biowardrobe_advanced
 from biowardrobe_airflow_advanced.operators import DeseqJobDispatcher
 from biowardrobe_airflow_advanced.operators import DeseqJobGatherer
 dag = biowardrobe_advanced("deseq-biowardrobe-only.cwl", DeseqJobDispatcher, DeseqJobGatherer, "biowardrobe_advanced")"""
-    export_dag(template=deseq_template, filename=os.path.join(DAGS_FOLDER, "deseq-biowardrobe-only.py"))
+    export_dag(template=deseq_template, filename=os.path.join(DAGS_FOLDER, "advanced-deseq.py"))
 
 
 def setup_airflow(config):
