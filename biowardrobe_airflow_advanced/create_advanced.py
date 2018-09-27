@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from cwl_airflow_parser.cwldag import CWLDAG
-from biowardrobe_airflow_plugins.utils.func import get_workflow
+from biowardrobe_airflow_advanced.utils.analyze import get_workflow
 
 
 def create_advanced(workflow_name, job_dispatcher, job_gatherer, pool):

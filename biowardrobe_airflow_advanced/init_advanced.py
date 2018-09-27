@@ -3,8 +3,8 @@ import os
 import sys
 import logging
 import argparse
-from biowardrobe_airflow_plugins.utils.connect import HookConnect
-from biowardrobe_airflow_plugins.utils.func import normalize_args
+from biowardrobe_airflow_advanced.utils.connect import HookConnect
+from biowardrobe_airflow_advanced.utils.analyze import normalize_args
 from airflow.settings import DAGS_FOLDER
 from airflow.bin.cli import api_client
 

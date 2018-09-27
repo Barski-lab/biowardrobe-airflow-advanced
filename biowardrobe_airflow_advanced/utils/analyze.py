@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-import logging
-import decimal
 import os
+import logging
+import argparse
+import decimal
 from json import dumps, loads
-from biowardrobe_airflow_plugins.utils.connect import HookConnect
-from biowardrobe_airflow_plugins.utils.func import (norm_path, fill_template)
+from collections import OrderedDict
+from biowardrobe_airflow_advanced.utils.connect import HookConnect
 
 
 logger = logging.getLogger(__name__)
@@ -42,6 +43,66 @@ def get_settings_data():
         "experimentsdb": settings['experimentsdb']
     }
     return settings_data
+
+
+def get_files(current_dir, filename_pattern=".*"):
+    """Files with the identical basenames are overwritten"""
+    files_dict = {}
+    for root, dirs, files in os.walk(current_dir):
+        files_dict.update(
+            {filename: os.path.join(root, filename) for filename in files if re.match(filename_pattern, filename)}
+        )
+    return files_dict
+
+
+def norm_path(path):
+    return os.path.abspath(os.path.normpath(os.path.normcase(path)))
+
+
+def get_workflow(workflow_name):
+    workflows_folder = norm_path(os.path.join(os.path.dirname(os.path.abspath(os.path.join(__file__, "../"))), "cwls"))
+    return get_files(workflows_folder)[workflow_name]
+
+
+def complete_input(item):
+    monitor = {"found_none": False}
+    recursive_check(item, monitor)
+    return not monitor["found_none"]
+
+
+def recursive_check(item, monitor):
+    if item == 'None' or (isinstance(item, str) and 'None' in item):
+        monitor["found_none"] = True
+    elif isinstance(item, dict):
+        dict((k, v) for k, v in item.items() if recursive_check(v, monitor))
+    elif isinstance(item, list):
+        list(v for v in item if recursive_check(v, monitor))
+
+
+def remove_not_set_inputs(job_object):
+    job_object_filtered ={}
+    for key, value in job_object.items():
+        if complete_input(value):
+            job_object_filtered[key] = value
+    return job_object_filtered
+
+
+def fill_template(template, kwargs):
+    job_object = remove_not_set_inputs(loads(template.replace('\n', ' ').format(**kwargs).
+                                             replace("'True'", 'true').replace("'False'", 'false').
+                                             replace('"True"', 'true').replace('"False"', 'false')))
+    return OrderedDict(sorted(job_object.items()))
+
+
+def normalize_args(args, skip_list=[]):
+    """Converts all relative path arguments to absolute ones relatively to the current working directory"""
+    normalized_args = {}
+    for key,value in args.__dict__.items():
+        if key not in skip_list:
+            normalized_args[key] = value if not value or os.path.isabs(value) else os.path.normpath(os.path.join(os.getcwd(), value))
+        else:
+            normalized_args[key]=value
+    return argparse.Namespace (**normalized_args)
 
 
 def get_deseq_job(conf):
