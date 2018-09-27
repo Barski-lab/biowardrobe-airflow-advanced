@@ -63,7 +63,9 @@ setup(
     license = 'Apache-2.0',
     packages=find_packages(),
     install_requires=[
-        'cwl-airflow-parser'
+        'sqlparse',
+        'cwl-airflow-parser',
+        'mysqlclient>=1.3.6'
     ],
     zip_safe=False,
     entry_points={

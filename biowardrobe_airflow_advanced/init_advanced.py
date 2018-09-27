@@ -35,10 +35,9 @@ def create_dags():
     deseq_template = u"""#!/usr/bin/env python3
 from airflow import DAG
 from biowardrobe_airflow_advanced import biowardrobe_advanced
-from biowardrobe_airflow_advanced.operators import DeseqJobDispatcher
-from biowardrobe_airflow_advanced.operators import DeseqJobGatherer
-dag = biowardrobe_advanced("deseq-biowardrobe-only.cwl", DeseqJobDispatcher, DeseqJobGatherer, "biowardrobe_advanced")"""
-    export_dag(template=deseq_template, filename=os.path.join(DAGS_FOLDER, "advanced-deseq.py"))
+from biowardrobe_airflow_advanced.operators import DeseqJobDispatcher, DeseqJobGatherer
+dag = biowardrobe_advanced("deseq-advanced.cwl", DeseqJobDispatcher, DeseqJobGatherer, "biowardrobe_advanced")"""
+    export_dag(template=deseq_template, filename=os.path.join(DAGS_FOLDER, "deseq-advanced.py"))
 
 
 def setup_airflow(config):

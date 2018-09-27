@@ -11,7 +11,7 @@ class DeseqJobGatherer(CWLJobGatherer):
 
     def execute(self, context):
         job_result, promises = self.cwl_gather(context)
-        conf = context['dag_run'].conf
-        job = get_deseq_job(conf)
-        upload_deseq(uid=job['uid'], filename=os.path.join(job["output_folder"], job["output_filename"]))
+        # conf = context['dag_run'].conf
+        # job = get_deseq_job(conf)
+        # upload_deseq(uid=job['uid'], filename=os.path.join(job["output_folder"], job["output_filename"]))
         return job_result
