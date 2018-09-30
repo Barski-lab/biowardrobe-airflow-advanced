@@ -20,6 +20,16 @@ inputs:
     format: "http://edamontology.org/format_3752"
     doc: "Treated input CSV files"
 
+  untreated_col_suffix:
+    type: string?
+    label: "Untreated RPKM column suffix"
+    doc: "Suffix for untreated RPKM column name"
+
+  treated_col_suffix:
+    type: string?
+    label: "Treated RPKM column suffix"
+    doc: "Suffix for treated RPKM column name"
+
   output_filename:
     type: string
     label: "Output filename"
@@ -47,6 +57,8 @@ steps:
     in:
       untreated_files: untreated_files
       treated_files: treated_files
+      untreated_col_suffix: untreated_col_suffix
+      treated_col_suffix: treated_col_suffix
       output_filename: output_filename
       threads: threads
     out: [diff_expr_file]
@@ -56,7 +68,7 @@ steps:
       requirements:
       - class: InlineJavascriptRequirement
       - class: DockerRequirement
-        dockerPull: biowardrobe2/scidap-deseq:v0.0.1
+        dockerPull: biowardrobe2/scidap-deseq:v0.0.2
       inputs:
         untreated_files:
           type:
@@ -74,16 +86,28 @@ steps:
             position: 6
             prefix: "-t"
           doc: "Treated input CSV files"
+        untreated_col_suffix:
+          type: string?
+          inputBinding:
+            position: 7
+            prefix: "-un"
+          doc: "Suffix for untreated RPKM column name"
+        treated_col_suffix:
+          type: string?
+          inputBinding:
+            position: 8
+            prefix: "-tn"
+          doc: "Suffix for treated RPKM column name"
         output_filename:
           type: string
           inputBinding:
-            position: 7
+            position: 9
             prefix: "-o"
           doc: "Output filename"
         threads:
           type: int?
           inputBinding:
-            position: 9
+            position: 10
             prefix: '-p'
           doc: "Run script using multiple threads"
       outputs:
