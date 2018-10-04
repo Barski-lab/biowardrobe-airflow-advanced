@@ -1,6 +1,7 @@
 #!/usr/bin/env Rscript
+options(warn=-1)
 
-library(data.table)
+suppressMessages(library(data.table))
 
 
 ##########################################################################################
@@ -40,27 +41,23 @@ load_isoform <- function(filename, combine_type) {
     return(as.data.frame(isoforms))
 }
 
-
 args <- commandArgs(trailingOnly = TRUE)
+isoforms <- normalizePath(as.character(args[1]))
+gene <- as.character(args[2])
+tss <- as.character(args[3])
 
-ISOFORMS = as.character(args[1])
-GENE = as.character(args[2])
-TSS = as.character(args[3])
-
-if(is.na(GENE)){
-    GENE <- "gene.tsv"
+if(is.na(gene) || is.na(tss)){
+    isoforms_nameroot = head(unlist(strsplit(basename(isoforms), ".", fixed = TRUE)), 1)
+    gene <- paste(isoforms_nameroot, "genes.tsv", sep=".")
+    tss <- paste(isoforms_nameroot, "common_tss.tsv", sep=".")
 }
-if(is.na(TSS)){
-    TSS <- "tss.tsv"
-}
-
 
 # Group by gene and common tss
 column_order <- c("RefseqId","GeneId","Chrom","TxStart","TxEnd","Strand","TotalReads","Rpkm")
-gene_data <- load_isoform(ISOFORMS, "gene")[column_order]
-tss_data <- load_isoform(ISOFORMS, "tss")[column_order]
+gene_data <- load_isoform(isoforms, "gene")[column_order]
+tss_data <- load_isoform(isoforms, "tss")[column_order]
 
 
 # Export results to TSV files
-write.table(gene_data, file=GENE, sep="\t", row.names=FALSE, col.names=TRUE, quote=FALSE)
-write.table(tss_data,  file=TSS,  sep="\t", row.names=FALSE, col.names=TRUE, quote=FALSE)
+write.table(gene_data, file=gene, sep="\t", row.names=FALSE, col.names=TRUE, quote=FALSE)
+write.table(tss_data,  file=tss,  sep="\t", row.names=FALSE, col.names=TRUE, quote=FALSE)
