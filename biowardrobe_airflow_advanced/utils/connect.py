@@ -3,9 +3,12 @@ import MySQLdb                                                 # TODO Do I need 
 import logging
 from sqlparse import split
 from contextlib import closing
+
 from airflow import models
 from airflow.hooks.mysql_hook import MySqlHook
 from airflow.utils.db import merge_conn
+
+from biowardrobe_airflow_advanced.utils.utilities import norm_path
 
 
 logger = logging.getLogger(__name__)
@@ -44,8 +47,24 @@ class Connect:
     def fetchall(self, sql):
         return self.execute(sql,2)
 
-    def get_settings(self):
+    def get_settings_raw(self):
         return {row['key']: row['value'] for row in self.fetchall("SELECT * FROM settings")}
+
+    def get_settings_data(self):
+        settings = self.get_settings_raw()
+        settings_data = {
+            "home":     norm_path(settings['wardrobe']),
+            "raw_data": norm_path("/".join((settings['wardrobe'], settings['preliminary']))),
+            "anl_data": norm_path("/".join((settings['wardrobe'], settings['advanced']))),
+            "indices":  norm_path("/".join((settings['wardrobe'], settings['indices']))),
+            "upload":   norm_path("/".join((settings['wardrobe'], settings['upload']))),
+            "bin":      norm_path("/".join((settings['wardrobe'], settings['bin']))),
+            "temp":     norm_path("/".join((settings['wardrobe'], settings['temp']))),
+            "experimentsdb": settings['experimentsdb'],
+            "airflowdb":     settings['airflowdb'],
+            "threads":       settings['maxthreads']
+        }
+        return settings_data
 
     def apply_patch(self, filename):
         logger.debug(f"Apply SQL patch: {filename}")

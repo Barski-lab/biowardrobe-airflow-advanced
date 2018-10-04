@@ -1,16 +1,16 @@
 #! /usr/bin/env python3
-import os
 import sys
 import logging
 import argparse
-from biowardrobe_airflow_advanced.utils.connect import HookConnect
-from biowardrobe_airflow_advanced.utils.analyze import normalize_args
-from airflow.settings import DAGS_FOLDER
-from airflow.bin.cli import api_client
+
+from biowardrobe_airflow_advanced.utils.connect import HookConnect, DirectConnect
+from biowardrobe_airflow_advanced.utils.utilities import normalize_args
+from biowardrobe_airflow_advanced.utils.initialize import (gen_outputs,
+                                                           create_pools,
+                                                           create_dags)
 
 
 logger = logging.getLogger(__name__)
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 def get_parser():
@@ -19,31 +19,15 @@ def get_parser():
     return parser
 
 
-def export_dag(template, filename, params={}):
-    with open(filename, 'w') as output_stream:
-        output_stream.write(template.format(**params))
-
-
-def create_pools(pool, slots=10, description=""):
-    try:
-        pools = [api_client.get_pool(name=pool)]
-    except Exception:
-        api_client.create_pool(name=pool, slots=slots, description=description)
-
-
-def create_dags():
-    deseq_template = u"""#!/usr/bin/env python3
-from airflow import DAG
-from biowardrobe_airflow_advanced import biowardrobe_advanced
-from biowardrobe_airflow_advanced.operators import DeseqJobDispatcher, DeseqJobGatherer
-dag = biowardrobe_advanced("deseq-advanced.cwl", DeseqJobDispatcher, DeseqJobGatherer, "biowardrobe_advanced")"""
-    export_dag(template=deseq_template, filename=os.path.join(DAGS_FOLDER, "deseq-advanced.py"))
-
-
 def setup_airflow(config):
-    HookConnect(config)  # Need to run it with config to create connection
+    HookConnect(config)  # Need to run it with config at least once to create connection
     create_pools("biowardrobe_advanced", 10, "Pool to run BioWardrobe Advanced Analysis")
     create_dags()
+
+
+def setup_biowardrobe(config):
+    db_connection_handler = DirectConnect(config)
+    gen_outputs(db_connection_handler)
 
 
 def main(argsl=None):
@@ -51,6 +35,7 @@ def main(argsl=None):
         argsl = sys.argv[1:]
     args,_ = get_parser().parse_known_args(argsl)
     args = normalize_args(args)
+    setup_biowardrobe(args.config)
     setup_airflow(args.config)
 
 

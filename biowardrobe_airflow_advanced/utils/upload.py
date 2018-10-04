@@ -1,5 +1,6 @@
 """Strategy pattern to run BaseUploader.execute depending on types of files to be uploaded"""
 import logging
+
 from biowardrobe_airflow_advanced.utils.connect import HookConnect
 
 
@@ -8,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 def upload_deseq(uid, filename, clean=False):
     connect_db = HookConnect()
-    table_name = connect_db.get_settings()["experimentsdb"] + '.`' + uid + '`'
+    table_name = connect_db.get_settings_data()["experimentsdb"] + '.`' + uid + '`'
     logger.debug(f"Uploading DESeq results from file {filename} to {table_name}")
     connect_db.execute(f"DROP TABLE IF EXISTS {table_name}")
     logger.debug(f"Drop {table_name} if exist")
