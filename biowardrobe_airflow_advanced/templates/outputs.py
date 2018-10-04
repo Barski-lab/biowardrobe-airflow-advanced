@@ -16,20 +16,25 @@
 """
 
 
-DESEQ = {
-    "outputs": """{{
-        "rpkm_genes": {{
-            "class": "File",
-            "location": "{raw_data}/{uid}/{uid}.genes.tsv"
+DESEQ = """
+    {{
+        "outputs": {{
+            "rpkm_genes": {{
+                "class": "File",
+                "location": "{raw_data}/{uid}/{uid}.genes.tsv"
+            }},
+            "rpkm_common_tss": {{
+                "class": "File",
+                "location": "{raw_data}/{uid}/{uid}.common_tss.tsv"}}
         }},
-        "rpkm_common_tss": {{
-            "class": "File",
-            "location": "{raw_data}/{uid}/{uid}.common_tss.tsv"}}
-    }}""",
-    "script": "Rscript {prefix}/get_gene_n_tss.R {raw_data}/{uid}/{uid}.isoforms.csv {raw_data}/{uid}/{uid}.genes.tsv {raw_data}/{uid}/{uid}.common_tss.tsv"
-}
-
-
+        "commands": [
+            "Rscript {prefix}/get_gene_n_tss.R",
+            "{outputs[rpkm_isoforms][location]}",
+            "{raw_data}/{uid}/{uid}.genes.tsv",
+            "{raw_data}/{uid}/{uid}.common_tss.tsv"
+        ]
+    }}
+"""
 
 
 TEMPLATES = {

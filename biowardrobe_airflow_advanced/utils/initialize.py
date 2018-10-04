@@ -36,8 +36,10 @@ def create_pools(pool, slots=10, description=""):
 
 
 def validate_outputs(superset, subset):
-    """Raises KeyError if at least one of the key from subset is not present in superset"""
-    dummy = [superset[key] for key, val in subset.items()]
+    try:
+        dummy = [superset[key] for key, val in subset.items()]
+    except KeyError:
+        raise OSError
 
 
 def gen_outputs(connect_db):
@@ -55,27 +57,28 @@ def gen_outputs(connect_db):
                          COALESCE(l.name4browser,'')<>''"""
     for db_record in connect_db.fetchall(sql_query):
         upload = False
-        exp_outputs = loads(db_record["outputs"]) if db_record["outputs"] and db_record['outputs'] != "null" else {}
         db_record.update(setting_data)
         db_record.update({"prefix": SCRIPTS_DIR})
-        for item in TEMPLATES.get(db_record["exp_id"], []):
-            item_outputs = fill_template(item["outputs"], db_record)
-            item_script = item["script"].format(**db_record)
+        db_record.update({"outputs": loads(db_record["outputs"]) if db_record["outputs"] and db_record['outputs'] != "null" else {}})
+        for item_str in TEMPLATES.get(db_record["exp_id"], []):
             try:
-                list(validate_locations(item_outputs))  # TODO Use normal way to execute generator
-                validate_outputs(exp_outputs, item_outputs)
-            except (OSError, KeyError) as ex:
+                item_parsed = fill_template(item_str, db_record)
+                list(validate_locations(item_parsed["outputs"]))  # TODO Use normal way to execute generator
+                validate_outputs(db_record["outputs"], item_parsed["outputs"])
+            except KeyError as ex:
+                print("Skip generating output for ", db_record["uid"],  ex)
+            except OSError as ex:
                 print("Missing required output", ex)
                 try:
-                    run_command(item_script)
-                    add_details_to_outputs(item_outputs)
-                    exp_outputs.update(item_outputs)
+                    run_command(" ".join(item_parsed["commands"]))
+                    add_details_to_outputs(item_parsed["outputs"])
+                    db_record["outputs"].update(item_parsed["outputs"])
                     upload = True
                 except subprocess.CalledProcessError as ex:
                     print("Failed to generate outputs: ", ex)
         if upload:
-            connect_db.execute(f"""UPDATE labdata SET params='{dumps(exp_outputs)}' WHERE uid='{db_record["uid"]}'""")
-            logger.info(f"""Update params for {db_record['uid']}\n {dumps(exp_outputs, indent=4)}""")
+            connect_db.execute(f"""UPDATE labdata SET params='{dumps(db_record["outputs"])}' WHERE uid='{db_record["uid"]}'""")
+            logger.info(f"""Update params for {db_record['uid']}\n {dumps(db_record["outputs"], indent=4)}""")
 
 
 
