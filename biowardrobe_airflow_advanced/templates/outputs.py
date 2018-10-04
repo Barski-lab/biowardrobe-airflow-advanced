@@ -26,7 +26,7 @@ DESEQ = {
             "class": "File",
             "location": "{raw_data}/{uid}/{uid}.common_tss.tsv"}}
     }}""",
-    "script": "Rscript get_gene_n_tss.R -i {raw_data}/{uid}/{uid}.isoforms.tsv -g {raw_data}/{uid}/{uid}.genes.tsv -t {raw_data}/{uid}/{uid}.common_tss.tsv"
+    "script": "Rscript {prefix}/get_gene_n_tss.R {raw_data}/{uid}/{uid}.isoforms.csv {raw_data}/{uid}/{uid}.genes.tsv {raw_data}/{uid}/{uid}.common_tss.tsv"
 }
 
 

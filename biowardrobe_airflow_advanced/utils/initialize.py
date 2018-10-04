@@ -11,10 +11,12 @@ from biowardrobe_airflow_advanced.utils.utilities import (validate_locations,
                                                           add_details_to_outputs,
                                                           fill_template,
                                                           run_command,
-                                                          export_to_file)
+                                                          export_to_file,
+                                                          norm_path)
 
 
 logger = logging.getLogger(__name__)
+SCRIPTS_DIR = norm_path(os.path.join(os.path.dirname(os.path.abspath(os.path.join(__file__, "../"))), "scripts"))
 
 
 def create_dags():
@@ -47,25 +49,28 @@ def gen_outputs(connect_db):
                          COALESCE(l.egroup_id,'')<>''  AND
                          COALESCE(l.name4browser,'')<>''"""
     for db_record in connect_db.fetchall(sql_query):
-        try:
-            exp_outputs = loads(db_record["outputs"]) if db_record["outputs"] and db_record['outputs'] != "null" else {}
-            db_record.update(setting_data)
-            for item in TEMPLATES[db_record["exp_id"]]:
-                item["outputs"] = fill_template(item["outputs"], db_record)
-                item["script"] = item["script"].format(**db_record)
+        upload = False
+        exp_outputs = loads(db_record["outputs"]) if db_record["outputs"] and db_record['outputs'] != "null" else {}
+        db_record.update(setting_data)
+        db_record.update({"prefix": SCRIPTS_DIR})
+        for item in TEMPLATES.get(db_record["exp_id"], []):
+            item_outputs = fill_template(item["outputs"], db_record)
+            item_script = item["script"].format(**db_record)
+            try:
+                list(validate_locations(item_outputs))
+                [exp_outputs[key] for key,val in item_outputs.items()]
+            except (OSError, KeyError) as ex:
+                print("Missing required output", ex)
                 try:
-                    validate_locations(item["outputs"])
-                except OSError:
-                    logger.debug(f"Missing required outputs for {exp_outputs['uid']}")
-                    try:
-                        run_command(item["script"])
-                        add_details_to_outputs(item["outputs"])
-                        exp_outputs.update(item["outputs"])
-                    except subprocess.CalledProcessError as ex:
-                        logger.error(f"""Failed to generate outputs for {exp_outputs["uid"]}\n{str(ex)}""")
+                    run_command(item_script)
+                    add_details_to_outputs(item_outputs)
+                    exp_outputs.update(item_outputs)
+                    upload = True
+                except subprocess.CalledProcessError as ex:
+                    print("Failed to generate outputs: ", ex)
+        if upload:
             connect_db.execute(f"""UPDATE labdata SET params='{dumps(exp_outputs)}' WHERE uid='{db_record["uid"]}'""")
             logger.info(f"""Update params for {db_record['uid']}\n {dumps(exp_outputs, indent=4)}""")
-        except Exception as ex:
-            logger.error(f"Failed to updated params for {db_record['uid']}\n {str(ex)}")
+
 
 
