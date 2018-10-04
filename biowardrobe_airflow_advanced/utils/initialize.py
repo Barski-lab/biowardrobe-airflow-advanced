@@ -35,6 +35,11 @@ def create_pools(pool, slots=10, description=""):
         api_client.create_pool(name=pool, slots=slots, description=description)
 
 
+def validate_outputs(superset, subset):
+    """Raises KeyError if at least one of the key from subset is not present in superset"""
+    dummy = [superset[key] for key, val in subset.items()]
+
+
 def gen_outputs(connect_db):
     setting_data = connect_db.get_settings_data()
     sql_query = """SELECT
@@ -57,8 +62,8 @@ def gen_outputs(connect_db):
             item_outputs = fill_template(item["outputs"], db_record)
             item_script = item["script"].format(**db_record)
             try:
-                list(validate_locations(item_outputs))
-                [exp_outputs[key] for key,val in item_outputs.items()]
+                list(validate_locations(item_outputs))  # TODO Use normal way to execute generator
+                validate_outputs(exp_outputs, item_outputs)
             except (OSError, KeyError) as ex:
                 print("Missing required output", ex)
                 try:
