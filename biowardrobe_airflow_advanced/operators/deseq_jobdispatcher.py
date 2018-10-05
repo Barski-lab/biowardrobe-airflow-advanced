@@ -9,7 +9,12 @@ class DeseqJobDispatcher(CWLJobDispatcher):
         super(DeseqJobDispatcher, self).__init__(task_id=self.__class__.__name__, *args, **kwargs)
 
     def execute(self, context):
-        # conf = {"condition":["untreated_uid", "treated_uid"], "groupby":"isoform", "result_uid":"uid"}
+        """
+        conf = {"condition":["untreated_uid", "treated_uid"], "groupby":1, "result_uid":"uid"}
+            "groupby": 1 - group by isoforms
+            "groupby": 2 - group by genes
+            "groupby": 3 - group by common tss
+        """
         conf = context['dag_run'].conf
         try:
             return self.cwl_dispatch(conf['job'])

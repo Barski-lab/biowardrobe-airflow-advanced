@@ -54,11 +54,16 @@ def get_deseq_job(conf):
     for idx, uid in enumerate(conf['condition']):
         logger.debug(f"Get experiment ids for {uid}")
         sql_query = f"SELECT tableName FROM genelist WHERE leaf=1 AND (parent_id like '{uid}' OR id like '{uid}')"
-        file_template = '{{"class": "File", "location": "{outputs[rpkm_isoforms][location]}", "format": "http://edamontology.org/format_3752"}}'
+        file_templates = {
+            1: '{{"class": "File", "location": "{outputs[rpkm_isoforms][location]}", "format": "http://edamontology.org/format_3752"}}',
+            2: '{{"class": "File", "location": "{outputs[rpkm_genes][location]}", "format": "http://edamontology.org/format_3752"}}',
+            3: '{{"class": "File", "location": "{outputs[rpkm_common_tss][location]}", "format": "http://edamontology.org/format_3752"}}'
+        }
+        current_file_template = file_templates[conf["groupby"]]
         for record in connect_db.fetchall(sql_query):
             exp_data = get_exp_data(record["tableName"])
             if idx == 0:
-                job["untreated_files"].append(fill_template(file_template, exp_data))
+                job["untreated_files"].append(fill_template(current_file_template, exp_data))
             else:
-                job["treated_files"].append(fill_template(file_template, exp_data))
+                job["treated_files"].append(fill_template(current_file_template, exp_data))
     return job
