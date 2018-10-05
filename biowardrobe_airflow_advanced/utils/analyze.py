@@ -56,8 +56,8 @@ def get_deseq_job(conf):
         sql_query = f"SELECT tableName FROM genelist WHERE leaf=1 AND (parent_id like '{uid}' OR id like '{uid}')"
         file_templates = {
             1: '{{"class": "File", "location": "{outputs[rpkm_isoforms][location]}", "format": "http://edamontology.org/format_3752"}}',
-            2: '{{"class": "File", "location": "{outputs[rpkm_genes][location]}", "format": "http://edamontology.org/format_3752"}}',
-            3: '{{"class": "File", "location": "{outputs[rpkm_common_tss][location]}", "format": "http://edamontology.org/format_3752"}}'
+            2: '{{"class": "File", "location": "{outputs[rpkm_genes][location]}", "format": "http://edamontology.org/format_3475"}}',
+            3: '{{"class": "File", "location": "{outputs[rpkm_common_tss][location]}", "format": "http://edamontology.org/format_3475"}}'
         }
         current_file_template = file_templates[conf["groupby"]]
         for record in connect_db.fetchall(sql_query):

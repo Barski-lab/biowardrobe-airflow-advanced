@@ -9,7 +9,9 @@ inputs:
       - File
       - File[]
     label: "Untreated input CSV files"
-    format: "http://edamontology.org/format_3752"
+    format:
+     - "http://edamontology.org/format_3752"
+     - "http://edamontology.org/format_3475"
     doc: "Untreated input CSV files"
 
   treated_files:
@@ -17,7 +19,9 @@ inputs:
       - File
       - File[]
     label: "Treated input CSV files"
-    format: "http://edamontology.org/format_3752"
+    format:
+     - "http://edamontology.org/format_3752"
+     - "http://edamontology.org/format_3475"
     doc: "Treated input CSV files"
 
   untreated_col_suffix:
@@ -68,7 +72,7 @@ steps:
       requirements:
       - class: InlineJavascriptRequirement
       - class: DockerRequirement
-        dockerPull: biowardrobe2/scidap-deseq:v0.0.3
+        dockerPull: biowardrobe2/scidap-deseq:v0.0.4
       inputs:
         untreated_files:
           type:
