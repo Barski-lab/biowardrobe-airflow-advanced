@@ -12,7 +12,7 @@ inputs:
     format:
      - "http://edamontology.org/format_3752"
      - "http://edamontology.org/format_3475"
-    doc: "Untreated input CSV files"
+    doc: "Untreated input CSV/TSV files"
 
   treated_files:
     type:
@@ -22,7 +22,7 @@ inputs:
     format:
      - "http://edamontology.org/format_3752"
      - "http://edamontology.org/format_3475"
-    doc: "Treated input CSV files"
+    doc: "Treated input CSV/TSV files"
 
   untreated_col_suffix:
     type: string?
@@ -37,7 +37,7 @@ inputs:
   output_filename:
     type: string
     label: "Output filename"
-    doc: "Output filename"
+    doc: "Output TSV filename"
 
   threads:
     type: int?
@@ -81,7 +81,7 @@ steps:
           inputBinding:
             position: 5
             prefix: "-u"
-          doc: "Untreated input CSV files"
+          doc: "Untreated input CSV/TSV files"
         treated_files:
           type:
             - File
@@ -89,7 +89,7 @@ steps:
           inputBinding:
             position: 6
             prefix: "-t"
-          doc: "Treated input CSV files"
+          doc: "Treated input CSV/TSV files"
         untreated_col_suffix:
           type: string?
           inputBinding:
@@ -107,7 +107,7 @@ steps:
           inputBinding:
             position: 9
             prefix: "-o"
-          doc: "Output filename"
+          doc: "Output TSV filename"
         threads:
           type: int?
           inputBinding:
