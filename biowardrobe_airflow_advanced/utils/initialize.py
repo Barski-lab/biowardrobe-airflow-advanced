@@ -55,7 +55,9 @@ def gen_outputs(connect_db):
                          (l.libstatus=12)              AND
                          COALESCE(l.egroup_id,'')<>''  AND
                          COALESCE(l.name4browser,'')<>''"""
+    logger.debug(f"Running SQL query:\n{sql_query}")
     for db_record in connect_db.fetchall(sql_query):
+        logger.debug(f"Process: {db_record['uid']} - {db_record['exp_type']}")
         upload = False
         db_record.update(setting_data)
         db_record.update({"prefix": SCRIPTS_DIR})
@@ -66,19 +68,22 @@ def gen_outputs(connect_db):
                 list(validate_locations(item_parsed["outputs"]))  # TODO Use normal way to execute generator
                 validate_outputs(db_record["outputs"], item_parsed["outputs"])
             except KeyError as ex:
-                print("Skip generating output for ", db_record["uid"],  ex)
+                logger.debug(f"Skip {db_record['uid']} - Missing required experiment's output {ex}")
             except OSError as ex:
-                print("Missing required output", ex)
+                logger.debug(f"Need to generate inputs for advanced analysis and then update DB for {db_record['uid']}")
+                logger.debug(f"Missing required file or experiment's output: {ex}")
                 try:
                     run_command(" ".join(item_parsed["commands"]))
                     add_details_to_outputs(item_parsed["outputs"])
                     db_record["outputs"].update(item_parsed["outputs"])
                     upload = True
                 except subprocess.CalledProcessError as ex:
-                    print("Failed to generate outputs: ", ex)
+                    logger.error(f"Failed to generate inputs for advanced analysis for {db_record['uid']} - {ex}")
+                except OSError as ex:
+                    logger.error(f"Failed to locate generated file for {db_record['uid']} - {ex}")
         if upload:
             connect_db.execute(f"""UPDATE labdata SET params='{dumps(db_record["outputs"])}' WHERE uid='{db_record["uid"]}'""")
-            logger.info(f"""Update params for {db_record['uid']}\n {dumps(db_record["outputs"], indent=4)}""")
+            logger.info(f"Update params for {db_record['uid']}\n {dumps(db_record['outputs'], indent=4)}")
 
 
 
