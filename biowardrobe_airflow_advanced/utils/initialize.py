@@ -74,7 +74,7 @@ def gen_outputs(connect_db):
                 logger.info(f"SKIP: couldn't find required experiment's output {ex}")
             except OSError as ex:
                 get_to_update_stage = True
-                logger.debug(f"GENERATE: couldn't find required file or correpospondent data in DB: {ex}")
+                logger.debug(f"GENERATE: missing file or correpospondent data in DB: {ex}")
                 try:
                     commands = " ".join(item_parsed["commands"])
                     logger.debug(f"RUN: {commands}")
@@ -89,7 +89,7 @@ def gen_outputs(connect_db):
 
         if get_to_upload_stage:
             connect_db.execute(f"""UPDATE labdata SET params='{dumps(db_record["outputs"])}' WHERE uid='{db_record["uid"]}'""")
-            logger.debug(f"Update experiment with new outputs\n{dumps(db_record['outputs'], indent=4)}")
+            logger.debug(f"UPDATE: new experiment's outputs\n{dumps(db_record['outputs'], indent=4)}")
             logger.info(f"SUCCESS: experiment's outputs have been corrected")
         elif get_to_update_stage:
             logger.info(f"FAIL: experiment's outputs have not been corrected")
