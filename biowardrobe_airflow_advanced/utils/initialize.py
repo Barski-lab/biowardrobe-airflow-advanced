@@ -55,35 +55,49 @@ def gen_outputs(connect_db):
                          (l.libstatus=12)              AND
                          COALESCE(l.egroup_id,'')<>''  AND
                          COALESCE(l.name4browser,'')<>''"""
-    logger.debug(f"Running SQL query:\n{sql_query}")
+    logger.debug(f"Run SQL query:\n{sql_query}")
     for db_record in connect_db.fetchall(sql_query):
-        logger.debug(f"Process: {db_record['uid']} - {db_record['exp_type']}")
-        upload = False
+        logger.info(f"LOAD: {db_record['uid']} - {db_record['exp_type']}")
+        get_to_update_stage = False
+        get_to_upload_stage = False
         db_record.update(setting_data)
         db_record.update({"prefix": SCRIPTS_DIR})
         db_record.update({"outputs": loads(db_record["outputs"]) if db_record["outputs"] and db_record['outputs'] != "null" else {}})
+
         for item_str in TEMPLATES.get(db_record["exp_id"], []):
             try:
+                logger.debug(f"CHECK: if experiment's outputs require correction")
                 item_parsed = fill_template(item_str, db_record)
                 list(validate_locations(item_parsed["outputs"]))  # TODO Use normal way to execute generator
                 validate_outputs(db_record["outputs"], item_parsed["outputs"])
             except KeyError as ex:
-                logger.debug(f"Skip {db_record['uid']} - Missing required experiment's output {ex}")
+                logger.info(f"SKIP: couldn't find required experiment's output {ex}")
             except OSError as ex:
-                logger.debug(f"Need to generate inputs for advanced analysis and then update DB for {db_record['uid']}")
-                logger.debug(f"Missing required file or experiment's output: {ex}")
+                get_to_update_stage = True
+                logger.debug(f"GENERATE: couldn't find required file or correpospondent data in DB: {ex}")
                 try:
-                    run_command(" ".join(item_parsed["commands"]))
+                    commands = " ".join(item_parsed["commands"])
+                    logger.debug(f"RUN: {commands}")
+                    run_command(commands)
                     add_details_to_outputs(item_parsed["outputs"])
                     db_record["outputs"].update(item_parsed["outputs"])
-                    upload = True
+                    get_to_upload_stage = True
                 except subprocess.CalledProcessError as ex:
-                    logger.error(f"Failed to generate inputs for advanced analysis for {db_record['uid']} - {ex}")
+                    logger.error(f"FAIL: got error while running the command {ex}")
                 except OSError as ex:
-                    logger.error(f"Failed to locate generated file for {db_record['uid']} - {ex}")
-        if upload:
+                    logger.error(f"FAIL: couldn't locate generated files {ex}")
+
+        if get_to_upload_stage:
             connect_db.execute(f"""UPDATE labdata SET params='{dumps(db_record["outputs"])}' WHERE uid='{db_record["uid"]}'""")
-            logger.info(f"Update params for {db_record['uid']}\n {dumps(db_record['outputs'], indent=4)}")
+            logger.debug(f"Update experiment with new outputs\n{dumps(db_record['outputs'], indent=4)}")
+            logger.info(f"SUCCESS: experiment's outputs have been corrected")
+        elif get_to_update_stage:
+            logger.info(f"FAIL: experiment's outputs have not been corrected")
+        else:
+            logger.info(f"SUCCESS: experiment's outputs are not required or cannot be corrected")
+
+
+
 
 
 
