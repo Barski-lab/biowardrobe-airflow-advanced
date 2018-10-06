@@ -8,7 +8,7 @@ inputs:
     type:
       - File
       - File[]
-    label: "Untreated input CSV files"
+    label: "Untreated input CSV/TSV files"
     format:
      - "http://edamontology.org/format_3752"
      - "http://edamontology.org/format_3475"
@@ -18,7 +18,7 @@ inputs:
     type:
       - File
       - File[]
-    label: "Treated input CSV files"
+    label: "Treated input CSV/TSV files"
     format:
      - "http://edamontology.org/format_3752"
      - "http://edamontology.org/format_3475"
@@ -36,7 +36,7 @@ inputs:
 
   output_filename:
     type: string
-    label: "Output filename"
+    label: "Output TSV filename"
     doc: "Output TSV filename"
 
   threads:
