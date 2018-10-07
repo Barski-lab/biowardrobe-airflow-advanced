@@ -18,9 +18,9 @@ def upload_deseq(uid, filename, clean=False):
             header = input_file.readline().strip().split()
         u_rpkm, t_rpkm = header[6], header[7]
         connect_db.execute(f"""CREATE TABLE {table_name}
-                                 (refseq_id VARCHAR(100) NOT NULL,
-                                 gene_id VARCHAR(100) NOT NULL,
-                                 chrom VARCHAR(255) NOT NULL,
+                                 (refseq_id VARCHAR(1000) NOT NULL,
+                                 gene_id VARCHAR(500) NOT NULL,
+                                 chrom VARCHAR(45) NOT NULL,
                                  txStart INT NULL,
                                  txEnd INT NULL,
                                  strand VARCHAR(1),
@@ -28,8 +28,14 @@ def upload_deseq(uid, filename, clean=False):
                                  {t_rpkm} FLOAT,
                                  LOGR FLOAT,
                                  pvalue FLOAT,
-                                 padj FLOAT
+                                 padj FLOAT,
+                                 INDEX refseq_id_idx (refseq_id ASC) USING BTREE,
+                                 INDEX gene_id_idx (gene_id ASC) USING BTREE,
+                                 INDEX chr_idx (chrom ASC) USING BTREE,
+                                 INDEX txStart_idx (txStart ASC) USING BTREE,
+                                 INDEX txEnd_idx (txEnd ASC) USING BTREE
                                 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 """)
+
         logger.debug(f"Create {table_name}")
         sql_header = f"INSERT INTO {table_name} VALUES "
         value_list = []
