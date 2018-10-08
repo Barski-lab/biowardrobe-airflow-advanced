@@ -37,19 +37,22 @@ def get_workflow(workflow_name):
 
 def get_deseq_job(conf):
     logger.debug(f"Collecting data for genelists:\n"
-                 f"  untreated -  {conf['condition'][0]}\n"
-                 f"  treated -    {conf['condition'][1]}\n"
-                 f"  groupby -    {conf['groupby']}\n"
-                 f"  result_uid - {conf['result_uid']}")
+                 f"  name -           {conf['name']}\n"
+                 f"  project_uid -    {conf['project_uid']}\n"
+                 f"  uid -            {conf['uid']}\n"
+                 f"  untreated -      {conf['condition'][0]}\n"
+                 f"  treated -        {conf['condition'][1]}\n"
+                 f"  groupby -        {conf['groupby']}\n")
+
     connect_db = HookConnect()
     setting_data = connect_db.get_settings_data()
     job = {
         "untreated_files": [],
         "treated_files": [],
-        "output_filename": conf['result_uid'] + "_deseq.tsv",
+        "output_filename": conf["uid"] + "_deseq.tsv",
         "threads": int(setting_data["threads"]),
-        "output_folder": os.path.join(setting_data["anl_data"], conf['result_uid']),
-        "uid": conf['result_uid']}
+        "output_folder": os.path.join(setting_data["anl_data"], conf["uid"]),
+        "uid": conf["uid"]}
 
     for idx, uid in enumerate(conf['condition']):
         logger.debug(f"Get experiment ids for {uid}")
@@ -67,3 +70,23 @@ def get_deseq_job(conf):
             else:
                 job["treated_files"].append(fill_template(current_file_template, exp_data))
     return job
+
+
+def get_genelist_data(uid):
+    connect_db = HookConnect()
+    sql_query = f"""SELECT tableName,
+                           name,
+                           gblink,
+                           rtype_id,
+                           UPPER(author) AS worker,
+                           fragmentsize,
+                           etype,
+                           COALESCE(ge.db, g.db) AS db,
+                           ge.annottable AS annotation,
+                           l.uid AS uid,
+                           g.type AS type
+                    FROM genelist g
+                    LEFT JOIN (labdata l, experimenttype e, genome ge)
+                    ON (labdata_id=l.id AND l.genome_id=ge.id AND l.experimenttype_id=e.id)
+                    WHERE g.id LIKE '{uid}'"""
+    return connect_db.fetchone(sql_query)

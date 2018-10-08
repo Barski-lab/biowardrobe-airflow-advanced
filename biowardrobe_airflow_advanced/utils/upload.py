@@ -2,12 +2,37 @@
 import logging
 
 from biowardrobe_airflow_advanced.utils.connect import HookConnect
+from biowardrobe_airflow_advanced.utils.analyze import get_genelist_data
 
 
 logger = logging.getLogger(__name__)
 
 
-def upload_deseq(uid, filename, clean=False):
+def update_deseq_genelist(conf):
+    connect_db = HookConnect()
+    genelist_info = []
+    for uid in conf['condition']:
+        genelist_info.append(get_genelist_data(uid))
+    grouping = {1: "isoforms", 2: "genes", 3: "common tss"}
+    comment = f"""Annotation grouping ({grouping['conf["groupby"]']}) were used for DESeq analysis.<br>
+                  Data from '{genelist_info[0]["name"]}' and '{genelist_info[1]["name"]}' has been chosen."""
+
+    sql_header = f"""INSERT INTO genelist (id,name,project_id,leaf,db,`type`,tableName,gblink,conditions,rtype_id,atype_id) VALUES
+                     ('{conf["uid"]}',
+                      '{conf["name"]}',
+                      '{conf["project_uid"]}',
+                       1,
+                      '{genelist_info[0]["db"]}',
+                       3,
+                      '{conf["uid"].replace("-","")}',
+                      'genelist_info[0]["gblink"] + "&" + genelist_info[1]["gblink"]',
+                      '{comment}',
+                      'conf["groupby"]'
+                       3)"""
+    connect_db.execute(sql_header)
+
+
+def upload_deseq_results(uid, filename, clean=False):
     connect_db = HookConnect()
     table_name = connect_db.get_settings_data()["experimentsdb"] + '.`' + uid + '`'
     logger.debug(f"Uploading DESeq results from file {filename} to {table_name}")
