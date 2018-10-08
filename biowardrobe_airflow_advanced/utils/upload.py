@@ -13,9 +13,9 @@ def update_deseq_genelist(conf):
     genelist_info = []
     for uid in conf['condition']:
         genelist_info.append(get_genelist_data(uid))
-    grouping = {1: "isoforms", 2: "genes", 3: "common tss"}
-    comment = f"""Annotation grouping ({grouping['conf["groupby"]']}) were used for DESeq analysis.<br>
-                  Data from '{genelist_info[0]["name"]}' and '{genelist_info[1]["name"]}' has been chosen."""
+    grouping = {1: "isoforms", 2: "genes", 3: "common tss"}[conf["groupby"]]
+    gblink = genelist_info[0]["gblink"] + "&" + genelist_info[1]["gblink"]
+    comment = f"""Annotation grouping ({grouping}) were used for DESeq analysis.<br>Data from "{genelist_info[0]['name']}" and "{genelist_info[1]['name']}" has been chosen."""
 
     sql_header = f"""INSERT INTO genelist (id,name,project_id,leaf,db,`type`,tableName,gblink,conditions,rtype_id,atype_id) VALUES
                      ('{conf["uid"]}',
@@ -25,9 +25,9 @@ def update_deseq_genelist(conf):
                       '{genelist_info[0]["db"]}',
                        3,
                       '{conf["uid"].replace("-","")}',
-                      'genelist_info[0]["gblink"] + "&" + genelist_info[1]["gblink"]',
+                      '{gblink}',
                       '{comment}',
-                      'conf["groupby"]'
+                       {conf["groupby"]},
                        3)"""
     connect_db.execute(sql_header)
 
