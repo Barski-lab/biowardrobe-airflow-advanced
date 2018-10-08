@@ -34,7 +34,7 @@ def update_deseq_genelist(conf):
 
 def upload_deseq_results(uid, filename, clean=False):
     connect_db = HookConnect()
-    table_name = connect_db.get_settings_data()["experimentsdb"] + '.`' + uid + '`'
+    table_name = connect_db.get_settings_data()["experimentsdb"] + '.`' + uid.replace("-", "") + '`'
     logger.debug(f"Uploading DESeq results from file {filename} to {table_name}")
     connect_db.execute(f"DROP TABLE IF EXISTS {table_name}")
     logger.debug(f"Drop {table_name} if exist")
