@@ -72,7 +72,7 @@ steps:
       requirements:
       - class: InlineJavascriptRequirement
       - class: DockerRequirement
-        dockerPull: biowardrobe2/scidap-deseq:v0.0.4
+        dockerPull: biowardrobe2/scidap-deseq:v0.0.5
       inputs:
         untreated_files:
           type:
