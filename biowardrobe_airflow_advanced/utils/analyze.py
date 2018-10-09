@@ -55,7 +55,7 @@ def get_deseq_job(conf):
         "uid": conf["uid"]}
 
     for idx, uid in enumerate(conf['condition']):
-        logger.debug(f"Get experiment ids for {uid}")
+        logger.debug(f"Get experiment IDs for {uid}")
         sql_query = f"SELECT tableName FROM genelist WHERE leaf=1 AND (parent_id like '{uid}' OR id like '{uid}')"
         file_templates = {
             1: '{{"class": "File", "location": "{outputs[rpkm_isoforms][location]}", "format": "http://edamontology.org/format_3752"}}',
@@ -74,19 +74,18 @@ def get_deseq_job(conf):
 
 def get_genelist_data(uid):
     connect_db = HookConnect()
-    sql_query = f"""SELECT tableName,
-                           name,
+    sql_query = f"""SELECT name,
+                           leaf,
+                           type,
+                           conditions,
                            gblink,
+                           db,
+                           tableName,
+                           labdata_id,
                            rtype_id,
-                           UPPER(author) AS worker,
-                           fragmentsize,
-                           etype,
-                           COALESCE(ge.db, g.db) AS db,
-                           ge.annottable AS annotation,
-                           l.uid AS uid,
-                           g.type AS type
-                    FROM genelist g
-                    LEFT JOIN (labdata l, experimenttype e, genome ge)
-                    ON (labdata_id=l.id AND l.genome_id=ge.id AND l.experimenttype_id=e.id)
-                    WHERE g.id LIKE '{uid}'"""
+                           atype_id,
+                           project_id,
+                           parent_id
+                    FROM genelist
+                    WHERE id LIKE '{uid}'"""
     return connect_db.fetchone(sql_query)

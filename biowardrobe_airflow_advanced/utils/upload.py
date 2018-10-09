@@ -9,26 +9,27 @@ logger = logging.getLogger(__name__)
 
 
 def update_deseq_genelist(conf):
+    logger.debug(f"Updating genelist table with DESeq results for {conf['uid']}")
     connect_db = HookConnect()
-    genelist_info = []
-    for uid in conf['condition']:
-        genelist_info.append(get_genelist_data(uid))
-    grouping = {1: "isoforms", 2: "genes", 3: "common tss"}[conf["groupby"]]
-    gblink = genelist_info[0]["gblink"] + "&" + genelist_info[1]["gblink"]
-    comment = f"""Annotation grouping ({grouping}) were used for DESeq analysis.<br>Data from "{genelist_info[0]['name']}" and "{genelist_info[1]['name']}" has been chosen."""
+    genelist_info = [get_genelist_data(uid) for uid in conf['condition']]
 
-    sql_header = f"""INSERT INTO genelist (id,name,project_id,leaf,db,`type`,tableName,gblink,conditions,rtype_id,atype_id) VALUES
+    grouping = {1: "isoforms", 2: "genes", 3: "common tss"}[conf["groupby"]]
+    gblink = "&".join([item["gblink"] for item in genelist_info])
+    names = [item["name"] for item in genelist_info]
+    table_name = conf["uid"].replace("-","")
+    comment = f"""Annotation grouping ({grouping}) were used for DESeq analysis.<br>Data from "{names[0]}" vs "{names[1]}" has been chosen."""
+
+    sql_header = f"""INSERT INTO genelist (id,name,leaf,`type`,conditions,gblink,db,tableName,rtype_id,project_id) VALUES
                      ('{conf["uid"]}',
                       '{conf["name"]}',
-                      '{conf["project_uid"]}',
                        1,
-                      '{genelist_info[0]["db"]}',
                        3,
-                      '{conf["uid"].replace("-","")}',
-                      '{gblink}',
                       '{comment}',
+                      '{gblink}',
+                      '',
+                      '{table_name}',
                        {conf["groupby"]},
-                       3)"""
+                      '{conf["project_uid"]}')"""
     connect_db.execute(sql_header)
 
 
