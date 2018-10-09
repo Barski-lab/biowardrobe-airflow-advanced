@@ -51,7 +51,7 @@ def apply_patches(connect_db):
         try:
             connect_db.apply_patch(filename)
         except Exception as ex:
-            logger.debug(f"Failed to appy patch {filename}\n {ex}")
+            logger.debug(f"Failed to apply patch {filename} due to\n {ex}")
 
 
 def gen_outputs(connect_db):
