@@ -7,7 +7,8 @@ from biowardrobe_airflow_advanced.utils.connect import HookConnect, DirectConnec
 from biowardrobe_airflow_advanced.utils.utilities import normalize_args
 from biowardrobe_airflow_advanced.utils.initialize import (gen_outputs,
                                                            create_pools,
-                                                           create_dags)
+                                                           create_dags,
+                                                           apply_patches)
 
 
 logger = logging.getLogger(__name__)
@@ -28,6 +29,7 @@ def setup_airflow(config):
 def setup_biowardrobe(config):
     db_connection_handler = DirectConnect(config)
     gen_outputs(db_connection_handler)
+    apply_patches(db_connection_handler)
 
 
 def main(argsl=None):

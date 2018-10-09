@@ -12,11 +12,13 @@ from biowardrobe_airflow_advanced.utils.utilities import (validate_locations,
                                                           fill_template,
                                                           run_command,
                                                           export_to_file,
-                                                          norm_path)
+                                                          norm_path,
+                                                          get_files)
 
 
 logger = logging.getLogger(__name__)
 SCRIPTS_DIR = norm_path(os.path.join(os.path.dirname(os.path.abspath(os.path.join(__file__, "../"))), "scripts"))
+SQL_DIR = norm_path(os.path.join(os.path.dirname(os.path.abspath(os.path.join(__file__, "../"))), "sql_patches"))
 
 
 def create_dags():
@@ -40,6 +42,16 @@ def validate_outputs(superset, subset):
         dummy = [superset[key] for key, val in subset.items()]
     except KeyError:
         raise OSError
+
+
+def apply_patches(connect_db):
+    logger.debug(f"Applying SQL patches from {SQL_DIR}")
+    bw_patches = get_files(os.path.join(SQL_DIR, "biowardrobe"), ".*sql$")
+    for filename in bw_patches.values():
+        try:
+            connect_db.apply_patch(filename)
+        except Exception as ex:
+            logger.debug(f"Failed to appy patch {filename}\n {ex}")
 
 
 def gen_outputs(connect_db):

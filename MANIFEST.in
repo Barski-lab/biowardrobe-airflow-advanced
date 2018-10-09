@@ -2,3 +2,4 @@ include biowardrobe_airflow_advanced/.git_version
 include biowardrobe_airflow_advanced/cwls/*.cwl
 include biowardrobe_airflow_advanced/scripts/*.R
 include biowardrobe_airflow_advanced/scripts/*.sh
+include biowardrobe_airflow_advanced/sql_patches/biowardrobe/*.sql

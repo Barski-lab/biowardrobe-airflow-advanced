@@ -1,5 +1,6 @@
 """Strategy pattern to run BaseUploader.execute depending on types of files to be uploaded"""
 import logging
+from json import dumps
 
 from biowardrobe_airflow_advanced.utils.connect import HookConnect
 from biowardrobe_airflow_advanced.utils.analyze import get_genelist_data
@@ -8,7 +9,7 @@ from biowardrobe_airflow_advanced.utils.analyze import get_genelist_data
 logger = logging.getLogger(__name__)
 
 
-def update_deseq_genelist(conf):
+def update_deseq_genelist(conf, job_result):
     logger.debug(f"Updating genelist table with DESeq results for {conf['uid']}")
     connect_db = HookConnect()
     genelist_info = [get_genelist_data(uid) for uid in conf['condition']]
@@ -19,7 +20,7 @@ def update_deseq_genelist(conf):
     table_name = conf["uid"].replace("-","")
     comment = f"""Annotation grouping ({grouping}) were used for DESeq analysis.<br>Data from "{names[0]}" vs "{names[1]}" has been chosen."""
 
-    sql_header = f"""INSERT INTO genelist (id,name,leaf,`type`,conditions,gblink,db,tableName,rtype_id,project_id) VALUES
+    sql_header = f"""INSERT INTO genelist (id,name,leaf,`type`,conditions,gblink,db,tableName,rtype_id,project_id,params) VALUES
                      ('{conf["uid"]}',
                       '{conf["name"]}',
                        1,
@@ -29,7 +30,8 @@ def update_deseq_genelist(conf):
                       '',
                       '{table_name}',
                        {conf["groupby"]},
-                      '{conf["project_uid"]}')"""
+                      '{conf["project_uid"]}',
+                      '{dumps(job_result)}')"""
     connect_db.execute(sql_header)
 
 
