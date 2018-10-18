@@ -11,13 +11,38 @@ from biowardrobe_airflow_advanced.utils.utilities import norm_path, get_files, f
 logger = logging.getLogger(__name__)
 
 
+def get_heatmap_job(conf):
+    logger.debug(f"Collecting data for genelist:\n"
+                 f"  name          - {conf['name']}\n"
+                 f"  uid           - {conf['uid']}\n"
+                 f"  data_uid      - {conf['data_uid']}\n"
+                 f"  intervals_uid - {conf['intervals_uid']}\n")
+    connect_db = HookConnect()
+    setting_data = connect_db.get_settings_data()
+    job = {
+        "bam_file":      [],
+        "genelist_file": None,
+        "fragment_size": [],
+        "threads": int(setting_data["threads"]),
+        "output_folder": os.path.join(setting_data["anl_data"], conf["uid"]),
+        "uid": conf["uid"]
+    }
+    exp_data = get_exp_data(get_genelist_data(conf['data_uid'])["tableName"])
+    intervals_data = get_genelist_data(conf['intervals_uid'])
+    job["bam_file"].append(fill_template('{{"class": "File", "location": "{outputs[bambai_pair][location]}", "format": "http://edamontology.org/format_2572"}}', exp_data))
+    job["genelist_file"] = fill_template('{{"class": "File", "location": "{outputs[genelist_file][location]}", "format": "http://edamontology.org/format_3475"}}', intervals_data)
+    job["fragment_size"].append(exp_data["fragment_size"])
+    return job
+
+
 def get_exp_data(uid):
     logger.debug(f"Collecting data for: {uid}")
     connect_db = HookConnect()
     sql_query = f"""SELECT 
                         l.params as outputs,
                         e.id     as exp_type_id,
-                        g.findex as genome_type
+                        g.findex as genome_type,
+                        l.fragmentsize as fragment_size
                     FROM labdata l
                     INNER JOIN (experimenttype e, genome g) ON (e.id=l.experimenttype_id AND g.id=l.genome_id)
                     LEFT JOIN (antibody a) ON (l.antibody_id=a.id)
@@ -73,6 +98,7 @@ def get_deseq_job(conf):
 
 
 def get_genelist_data(uid):
+    logger.debug(f"Collecting data from genelist for: {uid}")
     connect_db = HookConnect()
     sql_query = f"""SELECT name,
                            leaf,
@@ -85,7 +111,13 @@ def get_genelist_data(uid):
                            rtype_id,
                            atype_id,
                            project_id,
-                           parent_id
+                           parent_id,
+                           params as outputs
                     FROM genelist
                     WHERE id LIKE '{uid}'"""
-    return connect_db.fetchone(sql_query)
+    logger.debug(f"Running SQL query:\n{sql_query}")
+    glist_data = connect_db.fetchone(sql_query)
+    glist_data = {key: (value if not isinstance(value, decimal.Decimal) else int(value)) for key, value in glist_data.items()}
+    glist_data.update({"outputs": loads(glist_data['outputs']) if glist_data['outputs'] else {}})
+    logger.debug(f"Collected data from genelist for: {uid}\n{dumps(glist_data, indent=4)}")
+    return glist_data

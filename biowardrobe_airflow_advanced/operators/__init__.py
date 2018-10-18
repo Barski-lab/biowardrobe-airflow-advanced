@@ -1,2 +1,4 @@
 from .deseq_jobdispatcher import DeseqJobDispatcher
 from .deseq_jobgatherer import DeseqJobGatherer
+from .heatmap_jobdispatcher import HeatmapJobDispatcher
+from .heatmap_jobgatherer import HeatmapJobGatherer

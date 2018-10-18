@@ -29,6 +29,13 @@ from biowardrobe_airflow_advanced.operators import DeseqJobDispatcher, DeseqJobG
 dag = biowardrobe_advanced("deseq-advanced.cwl", DeseqJobDispatcher, DeseqJobGatherer, "biowardrobe_advanced")"""
     export_to_file(deseq_template, os.path.join(DAGS_FOLDER, "deseq-advanced.py"))
 
+    heatmap_template = u"""#!/usr/bin/env python3
+from airflow import DAG
+from biowardrobe_airflow_advanced import biowardrobe_advanced
+from biowardrobe_airflow_advanced.operators import HeatmapJobDispatcher, HeatmapJobGatherer
+dag = biowardrobe_advanced("heatmap.cwl", HeatmapJobDispatcher, HeatmapJobGatherer, "biowardrobe_advanced")"""
+    export_to_file(heatmap_template, os.path.join(DAGS_FOLDER, "heatmap.py"))
+
 
 def create_pools(pool, slots=10, description=""):
     try:

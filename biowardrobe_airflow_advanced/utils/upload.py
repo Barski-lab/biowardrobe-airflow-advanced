@@ -9,6 +9,18 @@ from biowardrobe_airflow_advanced.utils.analyze import get_genelist_data
 logger = logging.getLogger(__name__)
 
 
+def update_heatmap_atdp(conf, job_result):
+    logger.debug(f"Updating atdp table with Heatmap results for {conf['uid']}")
+    connect_db = HookConnect()
+    sql_header = f"""INSERT INTO atdp (genelist_id, tbl1_id, tbl2_id, pltname, params) VALUES
+                     ('{conf["uid"]}',
+                      '{conf["data_uid"]}',
+                      '{conf["intervals_uid"]}',
+                      '{conf["name"]}',
+                      '{dumps(job_result)}')"""
+    connect_db.execute(sql_header)
+
+
 def update_deseq_genelist(conf, job_result):
     logger.debug(f"Updating genelist table with DESeq results for {conf['uid']}")
     connect_db = HookConnect()
