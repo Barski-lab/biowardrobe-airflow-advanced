@@ -32,7 +32,7 @@ def get_collect_heatmap_data(uid):
     data = []
     for atdp_data in get_atdp_data(uid):
         for heatmap_file in atdp_data["outputs"]["heatmap_file"]:
-            heatmap_data = load(heatmap_file["lcoation"])
+            heatmap_data = load(heatmap_file["location"])
             data.append({
                 "array":     heatmap_data["data"],
                 "rows":      heatmap_data["index"],
@@ -63,7 +63,7 @@ def get_collect_heatmap_data(uid):
 def main(args=None):
     if args is None:
         args = sys.argv[1:]
-    print(dumps(get_collect_heatmap_data(args[1]), indent=4))
+    print(dumps(get_collect_heatmap_data(args[0]), indent=4))
 
 
 if __name__ == "__main__":
