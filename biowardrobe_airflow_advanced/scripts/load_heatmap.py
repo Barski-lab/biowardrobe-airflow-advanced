@@ -32,7 +32,10 @@ def get_collect_heatmap_data(uid):
     data = []
     for atdp_data in get_atdp_data(uid):
         for heatmap_file in atdp_data["outputs"]["heatmap_file"]:
-            heatmap_data = load(heatmap_file["location"])
+            if heatmap_file["location"].startswith("file://"):
+                heatmap_file["location"] = heatmap_file["location"][7:]
+            with open(heatmap_file["location"], 'r') as input_stream:
+                heatmap_data = load(input_stream)
             data.append({
                 "array":     heatmap_data["data"],
                 "rows":      heatmap_data["index"],
