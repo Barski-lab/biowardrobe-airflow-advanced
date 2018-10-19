@@ -10,5 +10,5 @@ class HeatmapJobGatherer(CWLJobGatherer):
     def execute(self, context):
         conf = context['dag_run'].conf
         job_result, promises = self.cwl_gather(context)
-        update_heatmap_atdp(conf, job_result)
+        # update_heatmap_atdp(conf, job_result)
         return job_result
