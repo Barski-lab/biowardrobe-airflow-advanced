@@ -44,7 +44,16 @@ def get_genelist_file(uid):
         logger.debug(f"Failed to find genelist file for: {uid}")
         connect_db = HookConnect()
         filename = os.path.join(connect_db.get_settings_data()["anl_data"], uid, uid+"_genelist.tsv")
-        export_to_file(connect_db.fetchone(f"""SELECT * FROM experiments.{genelist_data["tableName"]}"""), filename),
+
+        data = connect_db.fetchall(f"""SELECT * FROM experiments.{genelist_data["tableName"]}""")
+        data_str = ""
+        for idx, record in enumerate(data):
+            if idx == 0:
+                data_str += "\t".join([str(item) for item in record.keys()]) + "\n"
+            else:
+                data_str += "\t".join([str(item) for item in record.values()]) + "\n"
+
+        export_to_file(data_str, filename)
         logger.debug(f"Export genelist file to: {filename}")
         genelist_data["outputs"].update({"genelist_file": {
                                             "class": "File",
