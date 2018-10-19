@@ -13,7 +13,17 @@ from cwltool.process import compute_checksums
 from cwltool.stdfsaccess import StdFsAccess
 
 
+def get_folder(abs_path, permissions=0o0775, exist_ok=True):
+    try:
+        os.makedirs(abs_path, mode=permissions)
+    except os.error as ex:
+        if not exist_ok:
+            raise
+    return abs_path
+
+
 def export_to_file(data, filename):
+    get_folder(os.path.dirname(filename))
     with open(filename, 'w') as output_stream:
         output_stream.write(data)
 

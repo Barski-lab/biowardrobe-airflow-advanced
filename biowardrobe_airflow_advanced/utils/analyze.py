@@ -5,7 +5,8 @@ import decimal
 from json import dumps, loads
 
 from biowardrobe_airflow_advanced.utils.connect import HookConnect
-from biowardrobe_airflow_advanced.utils.utilities import norm_path, get_files, fill_template
+from biowardrobe_airflow_advanced.utils.utilities import norm_path, get_files, fill_template, export_to_file
+
 
 
 logger = logging.getLogger(__name__)
@@ -28,11 +29,32 @@ def get_heatmap_job(conf):
         "uid": conf["uid"]
     }
     exp_data = get_exp_data(get_genelist_data(conf['data_uid'])["tableName"])
-    intervals_data = get_genelist_data(conf['intervals_uid'])
     job["bam_file"].append(fill_template('{{"class": "File", "location": "{outputs[bambai_pair][location]}", "format": "http://edamontology.org/format_2572"}}', exp_data))
-    job["genelist_file"] = fill_template('{{"class": "File", "location": "{outputs[genelist_file][location]}", "format": "http://edamontology.org/format_3475"}}', intervals_data)
+    job["genelist_file"] = get_genelist_file(conf['intervals_uid'])
     job["fragment_size"].append(exp_data["fragment_size"])
     return job
+
+
+def get_genelist_file(uid):
+    genelist_data = get_genelist_data(uid)
+    genelist_file_template = '{{"class": "File", "location": "{outputs[genelist_file][location]}", "format": "http://edamontology.org/format_3475"}}'
+    try:
+        genelist_file = fill_template(genelist_file_template, genelist_data)
+    except KeyError:
+        logger.debug(f"Failed to find genelist file for: {uid}")
+        connect_db = HookConnect()
+        filename = os.path.join(connect_db.get_settings_data()["anl_data"], uid, uid+"_genelist.tsv")
+        export_to_file(connect_db.fetchone(f"""SELECT * FROM experiments.{genelist_data["tableName"]}"""), filename),
+        logger.debug(f"Export genelist file to: {filename}")
+        genelist_data["outputs"].update({"genelist_file": {
+                                            "class": "File",
+                                            "location": filename,
+                                            "format": "http://edamontology.org/format_3475"}
+                                         })
+        connect_db.execute(f"""UPDATE genelist SET params='{dumps(genelist_data["outputs"])}' WHERE id='{uid}'""")
+        logger.debug(f"""Update params for {uid}\n{dumps(genelist_data["outputs"], indent=4)}""")
+        genelist_file = fill_template(genelist_file_template, genelist_data)
+    return genelist_file
 
 
 def get_exp_data(uid):
