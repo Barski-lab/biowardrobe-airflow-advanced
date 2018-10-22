@@ -164,13 +164,13 @@ steps:
             prefix: "-d"
         hist_width:
           type: int?
-          default: 10000
+          default: 5000
           inputBinding:
             position: 8
             prefix: "-size"
         hist_bin_size:
           type: int?
-          default: 50
+          default: 200
           inputBinding:
             position: 9
             prefix: "-hist"
