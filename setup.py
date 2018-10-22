@@ -70,8 +70,7 @@ setup(
     zip_safe=False,
     entry_points={
         'console_scripts': [
-            "biowardrobe-advanced-init=biowardrobe_airflow_advanced.init_advanced:main",
-            "biowardrobe-advanced-load-heatmap=biowardrobe_airflow_advanced.load_heatmap:main"
+            "biowardrobe-advanced-init=biowardrobe_airflow_advanced.init_advanced:main"
         ]
     },
     include_package_data=True,

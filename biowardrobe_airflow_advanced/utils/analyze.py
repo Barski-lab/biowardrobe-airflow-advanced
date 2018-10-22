@@ -171,37 +171,3 @@ def get_atdp_data(uid):
         atdp_data.append(data)
     logger.debug(f"Collected data from atdp for: {uid}\n{dumps(atdp_data, indent=4)}")
     return atdp_data
-
-
-def get_collected_heatmap_data(uid):
-    data = []
-    for atdp_data in get_atdp_data(uid):
-        for heatmap_file in atdp_data["outputs"]["heatmap_file"]:
-            if heatmap_file["location"].startswith("file://"):
-                heatmap_file["location"] = heatmap_file["location"][7:]
-            with open(heatmap_file["location"], 'r') as input_stream:
-                heatmap_data = load(input_stream)
-            data.append({
-                "array":     heatmap_data["data"],
-                "rows":      heatmap_data["index"],
-                "cols":      heatmap_data["columns"],
-                "pltname":   atdp_data["name"],
-                "tbl1_id":   atdp_data["data_uid"],
-                "tbl2_id":   atdp_data["intervals_uid"],
-                "bodyarray": [],
-                "genebody":  [],
-                "rpkmarray": [],
-                "rpkmcols":  [],
-                "glengths": [],
-                "mapped":    None,
-                "max":       None,
-                "tbl1_name": None,
-                "tbl2_name": None
-            })
-    collected_heatmap_data = {
-        "data": data,
-        "message": "Data populated",
-        "total": len(data),
-        "success": True
-    }
-    return collected_heatmap_data
