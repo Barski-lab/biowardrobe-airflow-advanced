@@ -2,31 +2,38 @@
 import os
 import sys
 import argparse
+import random
 from json import dumps, load
 
 
 def get_parser():
     parser = argparse.ArgumentParser(description='BioWardrobe Airflow Advanced Load Heatmap', add_help=True)
     parser.add_argument("-f", "--folder",   help="Path to the folder with heatmap files to be refactored", required=True)
-    parser.add_argument("-t", "--template", help="Path to the template json file")
     return parser
 
 
 def get_collected_heatmap_data(folder, template_file=None):
-    template_data = {}
-    if template_file:
-        with open(template_file, 'r') as input_stream:
-            template_data = load(input_stream)["data"][0]
     data = []
     for heatmap_file in os.listdir(folder):
         with open(os.path.join(folder, heatmap_file), 'r') as input_stream:
             heatmap_data = load(input_stream)
-        template_data.update({
+        data.append({
             "array":     heatmap_data["data"],
+            "bodyarray": [random.sample(range(5000, 10000), 300) for i in range(len(heatmap_data["data"]))],  # dummy data
+            "cols":      heatmap_data["columns"],
+            "genebody":  random.sample(range(1, 5), 3000),                             # dummy data
+            "glengths":  random.sample(range(5000, 10000), len(heatmap_data["data"])), # dummy data
+            "mapped":    10000000,                                                     # dummy data
+            "max":       max([max(sublist) for sublist in heatmap_data["data"]]),      # dummy data
+            "pltname":   heatmap_file,
             "rows":      heatmap_data["index"],
-            "cols":      heatmap_data["columns"]
+            "rpkmarray": [random.sample(range(0, 10), 2) for i in range(len(heatmap_data["data"]))],  # dummy data
+            "rpkmcols":  ["RPKM_DUMMY_1", "RPKM_DUMMY_2"],  # dummy data
+            "tbl1_id":   "tbl1_id",                         # dummy data
+            "tbl1_name": "tbl1_name",                       # dummy data
+            "tbl2_id":   "tbl2_id",                         # dummy data
+            "tbl2_name": "tbl2_name"                        # dummy data
         })
-        data.append(template_data)
     collected_heatmap_data = {
         "data": data,
         "message": "Data populated",
