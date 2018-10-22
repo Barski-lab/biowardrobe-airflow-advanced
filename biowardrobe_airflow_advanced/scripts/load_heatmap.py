@@ -47,7 +47,7 @@ def get_collect_heatmap_data(uid):
                 "genebody":  [],
                 "rpkmarray": [],
                 "rpkmcols":  [],
-                "glengths" : [],
+                "glengths": [],
                 "mapped":    None,
                 "max":       None,
                 "tbl1_name": None,
@@ -66,7 +66,7 @@ def get_collect_heatmap_data(uid):
 def main(args=None):
     if args is None:
         args = sys.argv[1:]
-    print(dumps(get_collect_heatmap_data(args[0]), indent=4))
+    print(get_collect_heatmap_data(args[0]))
 
 
 if __name__ == "__main__":
