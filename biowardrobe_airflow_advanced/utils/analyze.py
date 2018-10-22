@@ -2,7 +2,7 @@
 import os
 import logging
 import decimal
-from json import dumps, loads
+from json import dumps, loads, load
 
 from biowardrobe_airflow_advanced.utils.connect import HookConnect
 from biowardrobe_airflow_advanced.utils.utilities import norm_path, get_files, fill_template, export_to_file
@@ -152,3 +152,56 @@ def get_genelist_data(uid):
     glist_data.update({"outputs": loads(glist_data['outputs']) if glist_data['outputs'] else {}})
     logger.debug(f"Collected data from genelist for: {uid}\n{dumps(glist_data, indent=4)}")
     return glist_data
+
+
+def get_atdp_data(uid):
+    logger.debug(f"Collecting data from atdp for: {uid}")
+    connect_db = HookConnect()
+    sql_query = f"""SELECT
+                        tbl1_id as data_uid,
+                        tbl2_id as intervals_uid,
+                        pltname as name,
+                        params as outputs
+                    FROM atdp
+                    WHERE genelist_id='{uid}'"""
+    logger.debug(f"Running SQL query:\n{sql_query}")
+    atdp_data = []
+    for data in connect_db.fetchall(sql_query):
+        data.update({"outputs": loads(data['outputs']) if data['outputs'] else {}})
+        atdp_data.append(data)
+    logger.debug(f"Collected data from atdp for: {uid}\n{dumps(atdp_data, indent=4)}")
+    return atdp_data
+
+
+def get_collected_heatmap_data(uid):
+    data = []
+    for atdp_data in get_atdp_data(uid):
+        for heatmap_file in atdp_data["outputs"]["heatmap_file"]:
+            if heatmap_file["location"].startswith("file://"):
+                heatmap_file["location"] = heatmap_file["location"][7:]
+            with open(heatmap_file["location"], 'r') as input_stream:
+                heatmap_data = load(input_stream)
+            data.append({
+                "array":     heatmap_data["data"],
+                "rows":      heatmap_data["index"],
+                "cols":      heatmap_data["columns"],
+                "pltname":   atdp_data["name"],
+                "tbl1_id":   atdp_data["data_uid"],
+                "tbl2_id":   atdp_data["intervals_uid"],
+                "bodyarray": [],
+                "genebody":  [],
+                "rpkmarray": [],
+                "rpkmcols":  [],
+                "glengths": [],
+                "mapped":    None,
+                "max":       None,
+                "tbl1_name": None,
+                "tbl2_name": None
+            })
+    collected_heatmap_data = {
+        "data": data,
+        "message": "Data populated",
+        "total": len(data),
+        "success": True
+    }
+    return collected_heatmap_data
