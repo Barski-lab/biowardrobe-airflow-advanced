@@ -19,7 +19,7 @@ def main(argsl=None):
     if argsl is None:
         argsl = sys.argv[1:]
     args,_ = get_parser().parse_known_args(argsl)
-    print(get_collected_heatmap_data(args[0]))
+    print(get_collected_heatmap_data(args.uid))
 
 
 if __name__ == "__main__":
