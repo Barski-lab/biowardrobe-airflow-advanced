@@ -145,6 +145,8 @@ steps:
       tag_folders: make_tag_folders/tag_folder
       export_heatmap:
         default: True
+      norm_raw:
+        default: True
       threads: threads
     out: [histogram_file]
     run:
@@ -179,6 +181,11 @@ steps:
           inputBinding:
             position: 10
             prefix: "-ghist"
+        norm_raw:
+          type: boolean
+          inputBinding:
+            position: 12
+            prefix: "-raw"
         threads:
           type: int?
           inputBinding:
