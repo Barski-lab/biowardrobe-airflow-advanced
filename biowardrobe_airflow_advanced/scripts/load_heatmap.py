@@ -17,14 +17,19 @@ def get_collected_heatmap_data(folder):
     for heatmap_file in os.listdir(folder):
         with open(os.path.join(folder, heatmap_file), 'r') as input_stream:
             heatmap_data = load(input_stream)
+        maximum_pos = int(len(heatmap_data["data"]) * 0.9)
+        maximum = sorted([max(sublist) for sublist in heatmap_data["data"]])[maximum_pos]
+        if maximum_pos > 1:
+            maximum = maximum + sorted([max(sublist) for sublist in heatmap_data["data"]])[maximum_pos - 1]
+            maximum = maximum / 2.0
         data.append({
             "array":     heatmap_data["data"],
             "bodyarray": [[0] * 300] * len(heatmap_data["data"]),  # dummy data
             "cols":      heatmap_data["columns"],
             "genebody":  [0] * 3000,                               # dummy data
             "glengths":  [5000] * len(heatmap_data["data"]),       # dummy data
-            "mapped":    0,                                                            # dummy data
-            "max":       max([max(sublist) for sublist in heatmap_data["data"]]),      # dummy data
+            "mapped":    1000000,                                  # dummy data
+            "max":       maximum,
             "pltname":   heatmap_file,
             "rows":      heatmap_data["index"],
             "rpkmarray": [[10, 12]] * len(heatmap_data["data"]),  # dummy data
