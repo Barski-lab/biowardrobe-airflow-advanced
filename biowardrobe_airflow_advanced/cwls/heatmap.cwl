@@ -92,7 +92,7 @@ steps:
                   ]
                 }
             - class: DockerRequirement
-              dockerPull: biowardrobe2/homer:v0.0.1
+              dockerPull: biowardrobe2/homer:v0.0.2
             inputs:
               bam_file:
                 type: File
@@ -153,7 +153,7 @@ steps:
       requirements:
       - class: InlineJavascriptRequirement
       - class: DockerRequirement
-        dockerPull: biowardrobe2/homer:v0.0.1
+        dockerPull: biowardrobe2/homer:v0.0.2
       inputs:
         peak_file:
           type: File
