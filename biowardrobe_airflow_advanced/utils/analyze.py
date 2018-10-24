@@ -20,18 +20,16 @@ def get_heatmap_job(conf):
                  f"  intervals_uid - {conf['intervals_uid']}\n")
     connect_db = HookConnect()
     setting_data = connect_db.get_settings_data()
+    exp_data = get_exp_data(get_genelist_data(conf['data_uid'])["tableName"])
     job = {
-        "bam_file":      [],
-        "genelist_file": None,
-        "fragment_size": [],
+        "bam_file":      fill_template('{{"class": "File", "location": "{outputs[bambai_pair][location]}", "format": "http://edamontology.org/format_2572"}}', exp_data),
+        "genelist_file": get_genelist_file(conf['intervals_uid']),
+        "fragment_size": exp_data["fragment_size"],
+        "heatmap_filename": conf['name'],
         "threads": int(setting_data["threads"]),
         "output_folder": os.path.join(setting_data["anl_data"], conf["uid"]),
         "uid": conf["uid"]
     }
-    exp_data = get_exp_data(get_genelist_data(conf['data_uid'])["tableName"])
-    job["bam_file"].append(fill_template('{{"class": "File", "location": "{outputs[bambai_pair][location]}", "format": "http://edamontology.org/format_2572"}}', exp_data))
-    job["genelist_file"] = get_genelist_file(conf['intervals_uid'])
-    job["fragment_size"].append(exp_data["fragment_size"])
     return job
 
 
