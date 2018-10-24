@@ -14,7 +14,7 @@ def get_parser():
 
 def get_collected_heatmap_data(folder):
     data = []
-    for heatmap_file in os.listdir(folder):
+    for heatmap_file in sorted(os.listdir(folder)):
         with open(os.path.join(folder, heatmap_file), 'r') as input_stream:
             heatmap_data = load(input_stream)
         maximum_pos = int(len(heatmap_data["data"]) * 0.9)
@@ -25,7 +25,7 @@ def get_collected_heatmap_data(folder):
         data.append({
             "array":     heatmap_data["data"],
             "bodyarray": [[0] * 300] * len(heatmap_data["data"]),  # dummy data
-            "cols":      heatmap_data["columns"],
+            "cols":      [heatmap_data["columns"][0]] + [""]*int(len(heatmap_data["columns"])/2-1) + ["TSS"] + [""]*int(len(heatmap_data["columns"])/2-1) + [heatmap_data["columns"][-1]],
             "genebody":  [0] * 3000,                               # dummy data
             "glengths":  [5000] * len(heatmap_data["data"]),       # dummy data
             "mapped":    1000000,                                  # dummy data
