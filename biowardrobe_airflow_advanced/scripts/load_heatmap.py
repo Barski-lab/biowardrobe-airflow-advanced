@@ -14,25 +14,25 @@ def get_parser():
 
 def get_collected_heatmap_data(folder):
     data = []
-    for heatmap_file in sorted(os.listdir(folder)):
-        with open(os.path.join(folder, heatmap_file), 'r') as input_stream:
-            heatmap_data = load(input_stream)
-        maximum_pos = int(len(heatmap_data["data"]) * 0.9)
-        maximum = sorted([max(sublist) for sublist in heatmap_data["data"]])[maximum_pos]
+    for json_file in sorted(os.listdir(folder)):
+        with open(os.path.join(folder, json_file), 'r') as input_stream:
+            json_data = load(input_stream)
+        maximum_pos = int(len(json_data["heatmap"]["data"]) * 0.9)
+        maximum = sorted([max(sublist) for sublist in json_data["heatmap"]["data"]])[maximum_pos]
         if maximum_pos > 1:
-            maximum = maximum + sorted([max(sublist) for sublist in heatmap_data["data"]])[maximum_pos - 1]
+            maximum = maximum + sorted([max(sublist) for sublist in json_data["heatmap"]["data"]])[maximum_pos - 1]
             maximum = maximum / 2.0
         data.append({
-            "array":     heatmap_data["data"],
-            "bodyarray": [[0] * 300] * len(heatmap_data["data"]),  # dummy data
-            "cols":      [heatmap_data["columns"][0]] + [""]*int(len(heatmap_data["columns"])/2-1) + ["TSS"] + [""]*int(len(heatmap_data["columns"])/2-1) + [heatmap_data["columns"][-1]],
-            "genebody":  [0] * 3000,                               # dummy data
-            "glengths":  [5000] * len(heatmap_data["data"]),       # dummy data
-            "mapped":    1000000,                                  # dummy data
+            "array":     json_data["heatmap"]["data"],
+            "bodyarray": [[0] * 300] * len(json_data["heatmap"]["data"]),  # dummy data
+            "cols":      [json_data["heatmap"]["columns"][0]] + [""]*int(len(json_data["heatmap"]["columns"])/2-1) + ["TSS"] + [""]*int(len(json_data["heatmap"]["columns"])/2-1) + [json_data["heatmap"]["columns"][-1]],
+            "genebody":  [item[0] for item in json_data["genebody"]["data"]],
+            "glengths":  [5000] * len(json_data["heatmap"]["data"]),  # dummy data
+            "mapped":    1000000,                                     # dummy data
             "max":       maximum,
-            "pltname":   os.path.splitext(os.path.basename(heatmap_file))[0],
-            "rows":      heatmap_data["index"],
-            "rpkmarray": [[10, 12]] * len(heatmap_data["data"]),  # dummy data
+            "pltname":   os.path.splitext(os.path.basename(json_file))[0],
+            "rows":      json_data["heatmap"]["index"],
+            "rpkmarray": [[10, 12]] * len(json_data["heatmap"]["data"]),  # dummy data
             "rpkmcols":  ["RPKM_DUMMY_1", "RPKM_DUMMY_2"],        # dummy data
             "tbl1_id":   "tbl1_id",                               # dummy data
             "tbl1_name": "tbl1_name",                             # dummy data

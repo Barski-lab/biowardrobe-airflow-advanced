@@ -25,7 +25,7 @@ def get_heatmap_job(conf):
         "bam_file":      fill_template('{{"class": "File", "location": "{outputs[bambai_pair][location]}", "format": "http://edamontology.org/format_2572"}}', exp_data),
         "genelist_file": get_genelist_file(conf['intervals_uid']),
         "fragment_size": exp_data["fragment_size"],
-        "heatmap_filename": conf['name'],
+        "json_filename": conf['name'],
         "threads": int(setting_data["threads"]),
         "output_folder": os.path.join(setting_data["anl_data"], conf["uid"]),
         "uid": conf["uid"]
