@@ -153,7 +153,7 @@ steps:
       flank_width:
         default: 5000
       flank_bin_size:
-        default: 50
+        default: 5
       genebody_bin_count:
         default: 1000
       genebody_hist_filename: json_filename
