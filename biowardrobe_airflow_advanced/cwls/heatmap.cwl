@@ -156,6 +156,11 @@ steps:
         default: 5
       genebody_bin_count:
         default: 1000
+      norm_fpkm:
+        default: True
+      norm_fragment_size: fragment_size
+      genebody_to_flank_ratio:
+        default: 1
       genebody_hist_filename: json_filename
       threads: threads
     out: [genebody_hist_file]
@@ -189,6 +194,21 @@ steps:
           inputBinding:
             position: 10
             prefix: "-gbin"
+        norm_fpkm:
+          type: boolean
+          inputBinding:
+            position: 11
+            prefix: "-fpkm"
+        norm_fragment_size:
+          type: int
+          inputBinding:
+            position: 17
+            prefix: "-normLength"
+        genebody_to_flank_ratio:
+          type: int
+          inputBinding:
+            position: 18
+            prefix: "-gRatio"
         threads:
           type: int?
           inputBinding:
