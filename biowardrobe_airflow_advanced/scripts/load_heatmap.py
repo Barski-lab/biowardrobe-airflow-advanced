@@ -26,7 +26,7 @@ def get_collected_heatmap_data(folder):
             "array":     json_data["heatmap"]["data"],
             "bodyarray": [[0] * 300] * len(json_data["heatmap"]["data"]),  # dummy data
             "cols":      [json_data["heatmap"]["columns"][0]] + [""]*int(len(json_data["heatmap"]["columns"])/2-1) + ["TSS"] + [""]*int(len(json_data["heatmap"]["columns"])/2-1) + [json_data["heatmap"]["columns"][-1]],
-            "genebody":  [item[0] for item in json_data["genebody"]["data"]],
+            "genebody":  [item[3] for item in json_data["genebody"]["data"]],
             "glengths":  [5000] * len(json_data["heatmap"]["data"]),  # dummy data
             "mapped":    1000000,                                     # dummy data
             "max":       maximum,

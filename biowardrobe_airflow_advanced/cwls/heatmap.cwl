@@ -265,6 +265,8 @@ steps:
     in:
       heatmap_file: make_heatmap/heatmap_file
       genebody_hist_file: make_genebody_hist/genebody_hist_file
+      smooth_window:
+        default: 40
     out: [json_file]
     run:
       cwlVersion: v1.0
@@ -276,13 +278,19 @@ steps:
           - entryname: to_json.py
             entry: |
               #!/usr/bin/env python
-              import os, sys, pandas as pd
+              import os, sys, pandas as pd, numpy as np
               from json import dumps
               hp_df = pd.read_table(sys.argv[1], index_col=0)
               gd_df = pd.read_table(sys.argv[2], index_col=0, header=0, names=["coverage", "pos_tags", "neg_tags"])
+              def smooth(y, b):
+                  s = np.r_[y[b - 1:0:-1], y, y[-2:-b - 1:-1]]
+                  w = np.ones(b, 'd')
+                  y = np.convolve(w / w.sum(), s, mode='same')
+                  return y[b - 1:-(b - 1)]
+              gd_df['smooth'] = pd.Series(smooth(gd_df['pos_tags']+gd_df['neg_tags'], int(sys.argv[3])), index=gd_df.index)
               d = {"heatmap": hp_df.to_dict(orient="split"), "genebody": gd_df.to_dict(orient="split")}
-              with open(os.path.splitext(os.path.basename(sys.argv[1]))[0]+".json", 'w') as s:
-                s.write(dumps(d))
+              with open(os.path.splitext(os.path.basename(sys.argv[1]))[0] + ".json", 'w') as s:
+                  s.write(dumps(d))
       - class: DockerRequirement
         dockerPull: biowardrobe2/python-pandas:v0.0.1
       inputs:
@@ -294,6 +302,10 @@ steps:
           type: File
           inputBinding:
             position: 6
+        smooth_window:
+          type: int
+          inputBinding:
+            position: 7
       outputs:
         json_file:
           type: File
