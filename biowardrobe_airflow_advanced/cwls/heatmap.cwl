@@ -265,7 +265,7 @@ steps:
     in:
       heatmap_file: make_heatmap/heatmap_file
       genebody_hist_file: make_genebody_hist/genebody_hist_file
-      smooth_window:
+      genebody_smooth_window:
         default: 40
     out: [json_file]
     run:
@@ -302,7 +302,7 @@ steps:
           type: File
           inputBinding:
             position: 6
-        smooth_window:
+        genebody_smooth_window:
           type: int
           inputBinding:
             position: 7
