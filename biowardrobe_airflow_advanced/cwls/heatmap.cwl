@@ -32,7 +32,7 @@ inputs:
     doc: "Output JSON filename"
 
   threads:
-    type: int?
+    type: int
     default: 1
     label: "Number of threads"
     doc: "Number of threads for those steps that support multithreading"
@@ -232,6 +232,13 @@ steps:
       peak_file: make_tss_centered_peak_file/tss_centered_peak_file
       tag_folder: make_tag_folder/tag_folder
       heatmap_filename: json_filename
+      hist_width:
+        default: 10000
+      hist_bin_size:
+        default: 400
+      norm_fpkm:
+        default: True
+      norm_fragment_size: fragment_size
       threads: threads
     out: [heatmap_file]
     run:
@@ -250,22 +257,30 @@ steps:
             position: 8
             prefix: "-d"
         hist_width:
-          type: int?
-          default: 5000
+          type: int
           inputBinding:
             position: 9
             prefix: "-size"
         hist_bin_size:
-          type: int?
-          default: 200
+          type: int
           inputBinding:
             position: 10
             prefix: "-hist"
         threads:
-          type: int?
+          type: int
           inputBinding:
             position: 11
             prefix: "-cpu"
+        norm_fpkm:
+          type: boolean
+          inputBinding:
+            position: 12
+            prefix: "-fpkm"
+        norm_fragment_size:
+          type: int
+          inputBinding:
+            position: 13
+            prefix: "-normLength"
         heatmap_filename:
           type: string
       outputs:
@@ -281,11 +296,81 @@ steps:
         - valueFrom: $("-ghist")
           position: 7
 
+  make_atdp_hist:
+    in:
+      peak_file: make_tss_centered_peak_file/tss_centered_peak_file
+      tag_folder: make_tag_folder/tag_folder
+      atdp_hist_filename: json_filename
+      hist_width:
+        default: 10000
+      hist_bin_size:
+        default: 5
+      norm_fpkm:
+        default: True
+      norm_fragment_size: fragment_size
+      threads: threads
+    out: [atdp_hist_file]
+    run:
+      cwlVersion: v1.0
+      class: CommandLineTool
+      requirements:
+      - class: InlineJavascriptRequirement
+      - class: DockerRequirement
+        dockerPull: biowardrobe2/homer:v0.0.2
+      inputs:
+        peak_file:
+          type: File
+        tag_folder:
+          type: Directory
+          inputBinding:
+            position: 8
+            prefix: "-d"
+        hist_width:
+          type: int
+          inputBinding:
+            position: 9
+            prefix: "-size"
+        hist_bin_size:
+          type: int
+          inputBinding:
+            position: 10
+            prefix: "-hist"
+        threads:
+          type: int
+          inputBinding:
+            position: 11
+            prefix: "-cpu"
+        norm_fpkm:
+          type: boolean
+          inputBinding:
+            position: 12
+            prefix: "-fpkm"
+        norm_fragment_size:
+          type: int
+          inputBinding:
+            position: 13
+            prefix: "-normLength"
+        atdp_hist_filename:
+          type: string
+      outputs:
+        atdp_hist_file:
+          type: stdout
+      stdout: ${return inputs.atdp_hist_filename;}
+      baseCommand: ["annotatePeaks.pl"]
+      arguments:
+        - valueFrom: $(inputs.peak_file)
+          position: 5
+        - valueFrom: $("none")
+          position: 6
+
   convert_to_json:
     in:
       heatmap_file: make_heatmap/heatmap_file
       genebody_hist_file: make_genebody_hist/genebody_hist_file
+      atdp_hist_file: make_atdp_hist/atdp_hist_file
       genebody_smooth_window:
+        default: 40
+      atdp_smooth_window:
         default: 40
     out: [json_file]
     run:
@@ -300,15 +385,21 @@ steps:
               #!/usr/bin/env python
               import os, sys, pandas as pd, numpy as np
               from json import dumps
-              hp_df = pd.read_table(sys.argv[1], index_col=0)
-              gd_df = pd.read_table(sys.argv[2], index_col=0, header=0, names=["coverage", "pos_tags", "neg_tags"])
+              hm_df = pd.read_table(sys.argv[1], index_col=0)
+              gb_df = pd.read_table(sys.argv[2], index_col=0, header=0, names=["coverage", "pos_tags", "neg_tags"])
+              td_df = pd.read_table(sys.argv[3], index_col=0, header=0, names=["coverage", "pos_tags", "neg_tags"])
               def smooth(y, b):
                   s = np.r_[y[b - 1:0:-1], y, y[-2:-b - 1:-1]]
                   w = np.ones(b, 'd')
                   y = np.convolve(w / w.sum(), s, mode='same')
                   return y[b - 1:-(b - 1)]
-              gd_df['smooth'] = pd.Series(smooth(gd_df['pos_tags']+gd_df['neg_tags'], int(sys.argv[3])), index=gd_df.index)
-              d = {"heatmap": hp_df.to_dict(orient="split"), "genebody": gd_df.to_dict(orient="split")}
+              gb_df['smooth'] = pd.Series(smooth(gb_df['pos_tags'] + gb_df['neg_tags'], int(sys.argv[4])), index=gb_df.index)
+              td_df['smooth'] = pd.Series(smooth(td_df['pos_tags'] + td_df['neg_tags'], int(sys.argv[5])), index=td_df.index)
+              d = {
+                  "heatmap":  hm_df.to_dict(orient="split"),
+                  "genebody": gb_df.to_dict(orient="split"),
+                  "atdp":     td_df.to_dict(orient="split")
+              }
               with open(os.path.splitext(os.path.basename(sys.argv[1]))[0] + ".json", 'w') as s:
                   s.write(dumps(d))
       - class: DockerRequirement
@@ -322,10 +413,18 @@ steps:
           type: File
           inputBinding:
             position: 6
+        atdp_hist_file:
+          type: File
+          inputBinding:
+            position: 7
         genebody_smooth_window:
           type: int
           inputBinding:
-            position: 7
+            position: 8
+        atdp_smooth_window:
+          type: int
+          inputBinding:
+            position: 9
       outputs:
         json_file:
           type: File
