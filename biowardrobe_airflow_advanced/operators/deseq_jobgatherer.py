@@ -1,6 +1,6 @@
 import os
 from cwl_airflow_parser import CWLJobGatherer
-from biowardrobe_airflow_advanced.utils.upload import upload_deseq_results, update_deseq_genelist
+from biowardrobe_airflow_advanced.utils.upload import upload_deseq_results, update_genelist_table_for_deseq
 
 
 class DeseqJobGatherer(CWLJobGatherer):
@@ -11,6 +11,6 @@ class DeseqJobGatherer(CWLJobGatherer):
     def execute(self, context):
         conf = context['dag_run'].conf
         job_result, promises = self.cwl_gather(context)
-        upload_deseq_results(uid=promises['uid'], filename=os.path.join(promises["output_folder"], promises["output_filename"]))
-        update_deseq_genelist(conf, job_result)
+        upload_deseq_results(conf, job_result)
+        update_genelist_table_for_deseq(conf, job_result)
         return job_result

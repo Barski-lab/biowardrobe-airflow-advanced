@@ -13,6 +13,10 @@ from cwltool.process import compute_checksums
 from cwltool.stdfsaccess import StdFsAccess
 
 
+def strip_filepath(filepath):
+    return filepath[7:] if "file://" in filepath else filepath
+
+
 def get_folder(abs_path, permissions=0o0775, exist_ok=True):
     try:
         os.makedirs(abs_path, mode=permissions)

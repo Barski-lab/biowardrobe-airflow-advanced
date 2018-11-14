@@ -1,5 +1,6 @@
+import os
 from cwl_airflow_parser import CWLJobGatherer
-from biowardrobe_airflow_advanced.utils.upload import update_heatmap_atdp
+from biowardrobe_airflow_advanced.utils.upload import update_atdp_table_for_heatmap, upload_atdp_results, update_genelist_table_for_atdp
 
 
 class HeatmapJobGatherer(CWLJobGatherer):
@@ -10,5 +11,7 @@ class HeatmapJobGatherer(CWLJobGatherer):
     def execute(self, context):
         conf = context['dag_run'].conf
         job_result, promises = self.cwl_gather(context)
-        update_heatmap_atdp(conf, job_result)
+        upload_atdp_results(conf, job_result)
+        update_atdp_table_for_heatmap(conf, job_result)
+        update_genelist_table_for_atdp(conf)
         return job_result
