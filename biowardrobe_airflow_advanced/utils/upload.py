@@ -1,7 +1,7 @@
 """Strategy pattern to run BaseUploader.execute depending on types of files to be uploaded"""
 import logging
 from json import dumps, load
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import SQLAlchemyError
 from biowardrobe_airflow_advanced.utils.connect import HookConnect
 from biowardrobe_airflow_advanced.utils.analyze import get_genelist_data
 from biowardrobe_airflow_advanced.utils.utilities import strip_filepath
@@ -51,7 +51,7 @@ def upload_atdp_results(conf, job_result):
                                     [f"""INSERT INTO {table_name}
                                            (X)
                                          VALUES ({i})""" for i in atdp_data["index"]]))
-    except OperationalError as e:
+    except SQLAlchemyError as e:
         logger.debug(f"""Failed to create table {table_name}: {e}""")
 
     logger.debug(f"""Inserting data into {table_name}""")
