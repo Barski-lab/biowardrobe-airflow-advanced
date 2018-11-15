@@ -1,7 +1,7 @@
 """Strategy pattern to run BaseUploader.execute depending on types of files to be uploaded"""
 import logging
 from json import dumps, load
-
+from sqlalchemy.exc import OperationalError
 from biowardrobe_airflow_advanced.utils.connect import HookConnect
 from biowardrobe_airflow_advanced.utils.analyze import get_genelist_data
 from biowardrobe_airflow_advanced.utils.utilities import strip_filepath
@@ -25,11 +25,14 @@ def upload_atdp_results(conf, job_result):
     connect_db = HookConnect()
     filename = strip_filepath(job_result["json_file"]["location"])
     table_name = connect_db.get_settings_data()["experimentsdb"] + '.`' + conf["uid"] + '`'
+
     logger.debug(f"""Uploading ATDP results from file {filename} to {table_name}""")
+
     atdp_tables = connect_db.fetchall(f"""SELECT tbl1_id,tbl2_id,pltname
                                           FROM atdp
                                           WHERE genelist_id='{conf["uid"]}'
                                           ORDER BY tbl1_id, tbl2_id""")  # we need this to display results in correct order
+
     idx = atdp_tables.index({"tbl1_id": conf["data_uid"],
                              "tbl2_id": conf["intervals_uid"],
                              "pltname": conf["name"]})
@@ -37,23 +40,24 @@ def upload_atdp_results(conf, job_result):
     with open(filename, 'r') as input_stream:
         atdp_data = load(input_stream)["atdp"]
 
-    if not connect_db.fetchone(f"""SHOW TABLES FROM {connect_db.get_settings_data()["experimentsdb"]} like '{conf["uid"]}'"""):
-        y_columns = ", ".join(["Y{} FLOAT NULL".format(i) for i in range(len(atdp_tables))])
-        connect_db.execute(f"""CREATE TABLE {table_name}
-                               ( 
-                                 X INT NULL,
-                                 {y_columns},
-                                 INDEX X_idx (X) using btree
-                               )
-                               ENGINE=MyISAM DEFAULT CHARSET=utf8""")
-        logger.debug(f"""Create {table_name}""")
-        for x_coord, data_record in zip(atdp_data["index"], atdp_data["data"]):
-            connect_db.execute(f"""INSERT INTO {table_name} (X, Y{idx}) VALUES ({x_coord}, {data_record[3]})""")
-    else:
-        for x_coord, data_record in zip(atdp_data["index"], atdp_data["data"]):
-            # data_record[3] corresponds to "smooth" column of "convert_to_json" generated file for "atdp"
-            connect_db.execute(f"""UPDATE {table_name} SET Y{idx}={data_record[3]} WHERE X={x_coord}""")
-    logger.debug(f"""Insert data into {table_name}""")
+    try:
+        logger.debug(f"""Creating table {table_name}""")
+        connect_db.execute(";".join([f"""CREATE TABLE {table_name}
+                                         ( 
+                                           X INT NULL,
+                                           {", ".join(["Y{} FLOAT NULL".format(i) for i in range(len(atdp_tables))])},
+                                           INDEX X_idx (X) using btree
+                                         ) ENGINE=MyISAM DEFAULT CHARSET=utf8"""] + \
+                                    [f"""INSERT INTO {table_name}
+                                           (X)
+                                         VALUES ({i})""" for i in atdp_data["index"]]))
+    except OperationalError as e:
+        logger.debug(f"""Failed to create table {table_name}: {e}""")
+
+    logger.debug(f"""Inserting data into {table_name}""")
+    connect_db.execute(";".join([f"""UPDATE {table_name} 
+                                     SET Y{idx}={r[3]}
+                                     WHERE X={i}""" for i, r in zip(atdp_data["index"], atdp_data["data"])]))
 
 
 def update_genelist_table_for_deseq(conf, job_result):

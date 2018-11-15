@@ -32,8 +32,10 @@ class Connect:
     def execute(self, sql, option=None):
         with closing(self.get_conn()) as connection:
             with closing(connection.cursor()) as cursor:
-                cursor.execute(sql)
-                connection.commit()
+                for sql_segment in split(sql):
+                    if sql_segment:
+                        cursor.execute(sql_segment)
+                        connection.commit()
                 if option == 1:
                     return cursor.fetchone()
                 elif option == 2:
@@ -69,9 +71,7 @@ class Connect:
     def apply_patch(self, filename):
         logger.debug(f"Apply SQL patch: {filename}")
         with open(filename) as patch_stream:
-            for sql_segment in split(patch_stream.read()):
-                if sql_segment:
-                    self.execute(sql_segment)
+            self.execute(patch_stream.read())
 
 
 class DirectConnect(Connect):

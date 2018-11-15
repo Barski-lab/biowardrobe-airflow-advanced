@@ -369,9 +369,9 @@ steps:
       genebody_hist_file: make_genebody_hist/genebody_hist_file
       atdp_hist_file: make_atdp_hist/atdp_hist_file
       genebody_smooth_window:
-        default: 40
-      atdp_smooth_window:
         default: 20
+      atdp_smooth_window:
+        default: 10
     out: [json_file]
     run:
       cwlVersion: v1.0
