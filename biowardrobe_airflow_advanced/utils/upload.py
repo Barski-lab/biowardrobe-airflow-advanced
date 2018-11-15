@@ -47,7 +47,7 @@ def upload_atdp_results(conf, job_result):
                                            X INT NULL,
                                            {", ".join(["Y{} FLOAT NULL".format(i) for i in range(len(atdp_tables))])},
                                            INDEX X_idx (X) using btree
-                                         ) ENGINE=MyISAM DEFAULT CHARSET=utf8"""] + \
+                                         ) ENGINE=MyISAM DEFAULT CHARSET=utf8"""] +
                                     [f"""INSERT INTO {table_name}
                                            (X)
                                          VALUES ({i})""" for i in atdp_data["index"]]))
