@@ -371,7 +371,7 @@ steps:
       genebody_smooth_window:
         default: 40
       atdp_smooth_window:
-        default: 40
+        default: 20
     out: [json_file]
     run:
       cwlVersion: v1.0
