@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 
 def update_atdp_table_for_heatmap(conf, job_result):
-    logger.debug(f"Updating atdp table with Heatmap results for {conf['uid']}")
+    logger.debug(f"""Updating atdp table with heatmap results for {conf["uid"]}""")
     connect_db = HookConnect()
     connect_db.execute(f"""UPDATE atdp
                            SET params='{dumps(job_result)}'
@@ -25,7 +25,7 @@ def upload_atdp_results(conf, job_result):
     connect_db = HookConnect()
     filename = strip_filepath(job_result["json_file"]["location"])
     table_name = connect_db.get_settings_data()["experimentsdb"] + '.`' + conf["uid"] + '`'
-    logger.debug(f"Uploading ATDP results from file {filename} to {table_name}")
+    logger.debug(f"""Uploading ATDP results from file {filename} to {table_name}""")
     atdp_tables = connect_db.fetchall(f"""SELECT tbl1_id,tbl2_id,pltname
                                           FROM atdp
                                           WHERE genelist_id='{conf["uid"]}'
@@ -46,14 +46,14 @@ def upload_atdp_results(conf, job_result):
                                  INDEX X_idx (X) using btree
                                )
                                ENGINE=MyISAM DEFAULT CHARSET=utf8""")
-        logger.debug(f"Create {table_name}")
+        logger.debug(f"""Create {table_name}""")
         for x_coord, data_record in zip(atdp_data["index"], atdp_data["data"]):
             connect_db.execute(f"""INSERT INTO {table_name} (X, Y{idx}) VALUES ({x_coord}, {data_record[3]})""")
     else:
         for x_coord, data_record in zip(atdp_data["index"], atdp_data["data"]):
             # data_record[3] corresponds to "smooth" column of "convert_to_json" generated file for "atdp"
             connect_db.execute(f"""UPDATE {table_name} SET Y{idx}={data_record[3]} WHERE X={x_coord}""")
-    logger.debug(f"Insert data into {table_name}")
+    logger.debug(f"""Insert data into {table_name}""")
 
 
 def update_genelist_table_for_deseq(conf, job_result):
@@ -83,9 +83,9 @@ def update_genelist_table_for_deseq(conf, job_result):
 
 
 def update_genelist_table_for_atdp(conf):
-    logger.debug(f"Updating genelist table with ATDP results for {conf['uid']}")
+    logger.debug(f"""Updating genelist table with ATDP results for {conf["uid"]}""")
     connect_db = HookConnect()
-    connect_db.execute(f"""UPDATE genelist SET tableName={conf['uid']} WHERE id={conf['uid']}""")
+    connect_db.execute(f"""UPDATE genelist SET tableName='{conf["uid"]}' WHERE id='{conf["uid"]}'""")
 
 
 def upload_deseq_results(conf, job_result):
