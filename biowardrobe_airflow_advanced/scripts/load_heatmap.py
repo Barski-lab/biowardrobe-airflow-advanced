@@ -30,7 +30,7 @@ def get_collected_heatmap_data(folder):
             "glengths":  [5000] * len(json_data["heatmap"]["data"]),  # dummy data
             "mapped":    1000000,                                     # dummy data
             "max":       maximum,
-            "pltname":   os.path.splitext(os.path.basename(json_file))[0],
+            "pltname":   json_data["plot_name"],
             "rows":      json_data["heatmap"]["index"],
             "rpkmarray": [[10, 12]] * len(json_data["heatmap"]["data"]),  # dummy data
             "rpkmcols":  ["RPKM_DUMMY_1", "RPKM_DUMMY_2"],        # dummy data

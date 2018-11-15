@@ -31,6 +31,11 @@ inputs:
     label: "Output JSON filename"
     doc: "Output JSON filename"
 
+  plot_name:
+    type: string
+    label: "Display name for plot"
+    doc: "Display name for plot"
+
   threads:
     type: int
     default: 1
@@ -372,6 +377,7 @@ steps:
         default: 20
       atdp_smooth_window:
         default: 10
+      plot_name: plot_name
     out: [json_file]
     run:
       cwlVersion: v1.0
@@ -396,9 +402,10 @@ steps:
               gb_df['smooth'] = pd.Series(smooth(gb_df['pos_tags'] + gb_df['neg_tags'], int(sys.argv[4])), index=gb_df.index)
               td_df['smooth'] = pd.Series(smooth(td_df['pos_tags'] + td_df['neg_tags'], int(sys.argv[5])), index=td_df.index)
               d = {
-                  "heatmap":  hm_df.to_dict(orient="split"),
-                  "genebody": gb_df.to_dict(orient="split"),
-                  "atdp":     td_df.to_dict(orient="split")
+                  "heatmap":   hm_df.to_dict(orient="split"),
+                  "genebody":  gb_df.to_dict(orient="split"),
+                  "atdp":      td_df.to_dict(orient="split")
+                  "plot_name": sys.argv[6]
               }
               with open(os.path.splitext(os.path.basename(sys.argv[1]))[0] + ".json", 'w') as s:
                   s.write(dumps(d))
@@ -425,6 +432,10 @@ steps:
           type: int
           inputBinding:
             position: 9
+        plot_name:
+          type: string
+          inputBinding:
+            position: 10
       outputs:
         json_file:
           type: File
