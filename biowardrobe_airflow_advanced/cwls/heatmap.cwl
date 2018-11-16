@@ -407,7 +407,7 @@ steps:
                   "heatmap":   hm_df.to_dict(orient="split"),
                   "genebody":  gb_df.to_dict(orient="split"),
                   "atdp":      td_df.to_dict(orient="split"),
-                  "rpkm":      gl_df.to_dict(orient="split")
+                  "rpkm":      gl_df.to_dict(orient="split"),
                   "plot_name": sys.argv[7]
               }
               with open(os.path.splitext(os.path.basename(sys.argv[1]))[0] + ".json", 'w') as s:
