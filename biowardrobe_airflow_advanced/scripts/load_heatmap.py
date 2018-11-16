@@ -27,13 +27,13 @@ def get_collected_heatmap_data(folder):
             "bodyarray": [[0] * 300] * len(json_data["heatmap"]["data"]),  # dummy data
             "cols":      [json_data["heatmap"]["columns"][0]] + [""]*int(len(json_data["heatmap"]["columns"])/2-1) + ["TSS"] + [""]*int(len(json_data["heatmap"]["columns"])/2-1) + [json_data["heatmap"]["columns"][-1]],
             "genebody":  [item[3] for item in json_data["genebody"]["data"]],
-            "glengths":  [5000] * len(json_data["heatmap"]["data"]),  # dummy data
+            "glengths":  [idx[4] - idx[3] for idx in json_data["rpkm"]["index"]],
             "mapped":    1000000,                                     # dummy data
             "max":       maximum,
             "pltname":   json_data["plot_name"],
-            "rows":      json_data["heatmap"]["index"],
-            "rpkmarray": [[10, 12]] * len(json_data["heatmap"]["data"]),  # dummy data
-            "rpkmcols":  ["RPKM_DUMMY_1", "RPKM_DUMMY_2"],        # dummy data
+            "rows":      json_data["heatmap"]["index"],           # maybe I should take it from json_data["rpkm"]["index"]
+            "rpkmarray": json_data["rpkm"]["data"],
+            "rpkmcols":  json_data["rpkm"]["columns"],
             "tbl1_id":   "tbl1_id",                               # dummy data
             "tbl1_name": "tbl1_name",                             # dummy data
             "tbl2_id":   "tbl2_id",                               # dummy data

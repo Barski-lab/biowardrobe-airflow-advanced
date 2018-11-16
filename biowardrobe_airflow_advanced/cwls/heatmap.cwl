@@ -373,6 +373,7 @@ steps:
       heatmap_file: make_heatmap/heatmap_file
       genebody_hist_file: make_genebody_hist/genebody_hist_file
       atdp_hist_file: make_atdp_hist/atdp_hist_file
+      genelist_file: genelist_file
       genebody_smooth_window:
         default: 20
       atdp_smooth_window:
@@ -394,18 +395,20 @@ steps:
               hm_df = pd.read_table(sys.argv[1], index_col=0)
               gb_df = pd.read_table(sys.argv[2], index_col=0, header=0, names=["coverage", "pos_tags", "neg_tags"])
               td_df = pd.read_table(sys.argv[3], index_col=0, header=0, names=["coverage", "pos_tags", "neg_tags"])
+              gl_df = pd.read_table(sys.argv[4], index_col=list(range(6)))
               def smooth(y, b):
                   s = np.r_[y[b - 1:0:-1], y, y[-2:-b - 1:-1]]
                   w = np.ones(b, 'd')
                   y = np.convolve(w / w.sum(), s, mode='same')
                   return y[b - 1:-(b - 1)]
-              gb_df['smooth'] = pd.Series(smooth(gb_df['pos_tags'] + gb_df['neg_tags'], int(sys.argv[4])), index=gb_df.index)
-              td_df['smooth'] = pd.Series(smooth(td_df['pos_tags'] + td_df['neg_tags'], int(sys.argv[5])), index=td_df.index)
+              gb_df['smooth'] = pd.Series(smooth(gb_df['pos_tags'] + gb_df['neg_tags'], int(sys.argv[5])), index=gb_df.index)
+              td_df['smooth'] = pd.Series(smooth(td_df['pos_tags'] + td_df['neg_tags'], int(sys.argv[6])), index=td_df.index)
               d = {
                   "heatmap":   hm_df.to_dict(orient="split"),
                   "genebody":  gb_df.to_dict(orient="split"),
                   "atdp":      td_df.to_dict(orient="split"),
-                  "plot_name": sys.argv[6]
+                  "rpkm":      gl_df.to_dict(orient="split")
+                  "plot_name": sys.argv[7]
               }
               with open(os.path.splitext(os.path.basename(sys.argv[1]))[0] + ".json", 'w') as s:
                   s.write(dumps(d))
@@ -424,18 +427,22 @@ steps:
           type: File
           inputBinding:
             position: 7
+        genelist_file:
+          type: File
+          inputBinding:
+            position: 8
         genebody_smooth_window:
           type: int
           inputBinding:
-            position: 8
+            position: 9
         atdp_smooth_window:
           type: int
           inputBinding:
-            position: 9
+            position: 10
         plot_name:
           type: string
           inputBinding:
-            position: 10
+            position: 11
       outputs:
         json_file:
           type: File
