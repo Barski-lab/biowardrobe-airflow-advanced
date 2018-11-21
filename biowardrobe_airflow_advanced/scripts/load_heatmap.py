@@ -31,13 +31,13 @@ def get_collected_heatmap_data(folder):
             "mapped":    1000000,                                     # dummy data
             "max":       maximum,
             "pltname":   json_data["plot_name"],
-            "rows":      json_data["heatmap"]["index"],           # maybe I should take it from json_data["rpkm"]["index"]
+            "rows":      json_data["heatmap"]["index"],               # maybe I should take it from json_data["rpkm"]["index"]
             "rpkmarray": json_data["rpkm"]["data"],
             "rpkmcols":  json_data["rpkm"]["columns"],
-            "tbl1_id":   "tbl1_id",                               # dummy data
-            "tbl1_name": "tbl1_name",                             # dummy data
-            "tbl2_id":   "tbl2_id",                               # dummy data
-            "tbl2_name": "tbl2_name"                              # dummy data
+            "tbl1_id":   json_data["data_uid"],
+            "tbl1_name": json_data["data_name"],
+            "tbl2_id":   json_data["intervals_uid"],
+            "tbl2_name": json_data["intervals_name"]
         })
     collected_heatmap_data = {
         "data": data,

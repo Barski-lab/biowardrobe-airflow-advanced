@@ -27,6 +27,10 @@ def get_heatmap_job(conf):
         "fragment_size": exp_data["fragment_size"],
         "json_filename": "-".join([conf['data_uid'], conf['intervals_uid']]),
         "plot_name": conf['name'],
+        "data_uid": conf['data_uid'],
+        "data_name": get_genelist_data(conf['data_uid'])["name"],
+        "intervals_uid": conf['intervals_uid'],
+        "intervals_name": get_genelist_data(conf['intervals_uid'])["name"],
         "threads": int(setting_data["threads"]),
         "output_folder": os.path.join(setting_data["anl_data"], conf["uid"]),
         "uid": conf["uid"]

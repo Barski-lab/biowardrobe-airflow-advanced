@@ -33,8 +33,28 @@ inputs:
 
   plot_name:
     type: string
-    label: "Display name for plot"
-    doc: "Display name for plot"
+    label: "Plot display name"
+    doc: "Plot display name"
+
+  data_uid:
+    type: string
+    label: "Experiment data UID"
+    doc: "Experiment data UID"
+
+  data_name:
+    type: string
+    label: "Experiment data display name"
+    doc: "Experiment data display name"
+
+  intervals_uid:
+    type: string
+    label: "Genelist UID"
+    doc: "Genelist UID"
+
+  intervals_name:
+    type: string
+    label: "Genelist display name"
+    doc: "Genelist display name"
 
   threads:
     type: int
@@ -379,6 +399,10 @@ steps:
       atdp_smooth_window:
         default: 10
       plot_name: plot_name
+      data_uid: data_uid
+      data_name: data_name
+      intervals_uid: intervals_uid
+      intervals_name: intervals_name
     out: [json_file]
     run:
       cwlVersion: v1.0
@@ -408,7 +432,11 @@ steps:
                   "genebody":  gb_df.to_dict(orient="split"),
                   "atdp":      td_df.to_dict(orient="split"),
                   "rpkm":      gl_df.to_dict(orient="split"),
-                  "plot_name": sys.argv[7]
+                  "plot_name":      sys.argv[7],
+                  "data_uid":       sys.argv[8],
+                  "data_name":      sys.argv[9],
+                  "intervals_uid":  sys.argv[10],
+                  "intervals_name": sys.argv[11]
               }
               with open(os.path.splitext(os.path.basename(sys.argv[1]))[0] + ".json", 'w') as s:
                   s.write(dumps(d))
@@ -443,6 +471,22 @@ steps:
           type: string
           inputBinding:
             position: 11
+        data_uid:
+          type: string
+          inputBinding:
+            position: 12
+        data_name:
+          type: string
+          inputBinding:
+            position: 13
+        intervals_uid:
+          type: string
+          inputBinding:
+            position: 14
+        intervals_name:
+          type: string
+          inputBinding:
+            position: 15
       outputs:
         json_file:
           type: File
