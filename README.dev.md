@@ -1,8 +1,9 @@
 # BioWardrobe Airflow Advanced Analysis
 
 ### Requirements
-1 To generate outputs for `DeSeq`, `R` with the following libraries are required:
-  - `data.table`
+1 To generate outputs for `DeSeq` the following programs should be installed
+  - `R`
+    - `data.table` library
 
 ### How to init advanced analysis
 Run on behalf of the user who has permissions to read BioWardrobe configuration file
