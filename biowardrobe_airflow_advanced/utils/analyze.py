@@ -38,6 +38,28 @@ def get_heatmap_job(conf):
     return job
 
 
+def get_pca_job(conf):
+    logger.debug(f"Generate job for PCA:\n"
+                 f"  uid -        {conf['uid']}\n"
+                 f"  expression - {conf['expression'][0]}\n")
+    connect_db = HookConnect()
+    setting_data = connect_db.get_settings_data()
+    job = {
+        "expression_file": [],
+        "legend_name": [],
+        "output_prefix": conf["uid"] + "_",
+        "output_folder": os.path.join(setting_data["anl_data"], conf["uid"]),
+        "uid": conf["uid"]}
+    for idx, uid in enumerate(conf['expression']):
+        genelist_data = get_genelist_data(uid)
+        exp_data = get_exp_data(genelist_data["tableName"])
+        job["expression_file"].append(f"""{{"class": "File",
+                                            "location": "{exp_data[rpkm_isoforms][location]}",
+                                            "format": "http://edamontology.org/format_3752"}}""")
+        job["legend_name"].append(genelist_data["name"])
+    return job
+
+
 def get_genelist_file(uid):
     genelist_data = get_genelist_data(uid)
     genelist_file_template = '{{"class": "File", "location": "{outputs[genelist_file][location]}", "format": "http://edamontology.org/format_3475"}}'

@@ -36,6 +36,13 @@ from biowardrobe_airflow_advanced.operators import HeatmapJobDispatcher, Heatmap
 dag = biowardrobe_advanced("heatmap.cwl", HeatmapJobDispatcher, HeatmapJobGatherer, "biowardrobe_advanced")"""
     export_to_file(heatmap_template, os.path.join(DAGS_FOLDER, "heatmap.py"))
 
+    pca_template = u"""#!/usr/bin/env python3
+from airflow import DAG
+from biowardrobe_airflow_advanced import biowardrobe_advanced
+from biowardrobe_airflow_advanced.operators import PcaJobDispatcher, PcaJobGatherer
+dag = biowardrobe_advanced("pca.cwl", PcaJobDispatcher, PcaJobGatherer, "biowardrobe_advanced")"""
+    export_to_file(pca_template, os.path.join(DAGS_FOLDER, "pca.py"))
+
 
 def create_pools(pool, slots=10, description=""):
     try:
