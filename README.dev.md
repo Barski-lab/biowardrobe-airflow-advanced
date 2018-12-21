@@ -56,3 +56,18 @@ Run on behalf of the user who has permissions to read BioWardrobe configuration 
      ```
    For more details refer to the `/wardrobe/src.new/EMS/ems/data/ATDPHeatA.php`
 
+4. To run PCA
+   - copy `biowardrobe_airflow_advanced/scripts/run_pca.sh` to the folder with `RPrjRun.php` as `RPrjRun.sh`
+   - update `RPrjRun.php` with the following lines
+     ```bash
+     //$exec_result = shell_exec($command);   -----> THIS IS THE OLD STRING
+
+     // Update to run PCA with CWL
+     if ($rscriptid=="PCA00000-0000-0000-0000-000000000001") {
+         $CMD_CWL = "/bin/bash /wardrobe/src.new/EMS/ems/data/RPrjRun.sh" . " " . $d->id . " " . $rargs;
+         exec($CMD_CWL);
+     } else {
+         $exec_result = shell_exec($command);
+     }
+     ```
+   - make sure that you set the absolute path to the `RPrjRun.sh`, because current directory is changed within `RPrjRun.php` 
