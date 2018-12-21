@@ -64,11 +64,11 @@ Run on behalf of the user who has permissions to read BioWardrobe configuration 
 
      // Update to run PCA with CWL
      if ($rscriptid=="PCA00000-0000-0000-0000-000000000001") {
-         $CMD_CWL = "/bin/bash /wardrobe/src.new/EMS/ems/data/RPrjRun.sh" . " " . $d->id . " " . $rargs;
+         $CMD_CWL = "/wardrobe/src.new/EMS/ems/data/RPrjRun.sh" . " " . $d->id . " " . $rargs;
          exec($CMD_CWL);
      } else {
          $exec_result = shell_exec($command);
      }
      ```
    - make sure that you set the absolute path to the `RPrjRun.sh`, because current directory is changed within `RPrjRun.php`
-   - make sure that `PCA00000-0000-0000-0000-000000000001` corresponds to the correct `id` in `ems.advanced_r` 
+   - make sure that `PCA00000-0000-0000-0000-000000000001` corresponds to the correct `id` in `ems.advanced_r`
