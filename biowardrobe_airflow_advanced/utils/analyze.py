@@ -50,7 +50,7 @@ def get_pca_job(conf):
         "output_prefix": conf["uid"] + "_",
         "output_folder": os.path.join(setting_data["anl_data"], conf["uid"]),
         "uid": conf["uid"]}
-    for idx, uid in enumerate(conf["expression"]):
+    for idx, uid in enumerate(conf["expression"].split()):
         genelist_data = get_genelist_data(uid)
         exp_data = get_exp_data(genelist_data["tableName"])
         job["expression_file"].append(fill_template("""{{"class": "File",

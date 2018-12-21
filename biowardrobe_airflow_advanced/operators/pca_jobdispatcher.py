@@ -11,10 +11,11 @@ class PcaJobDispatcher(CWLJobDispatcher):
         """
             conf = {
                 "uid":         string,
-                "expression":  [string, string, ...]
+                "expression":  "string string string ..."
             }
         
-            "uid" is taken from $UUID and is randomly generated      
+            "uid" is taken from $UUID and is randomly generated
+            "expression" is the space-separated string to include ids from genelist
         """
         conf = context['dag_run'].conf
         try:
