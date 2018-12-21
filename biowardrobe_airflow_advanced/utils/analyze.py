@@ -51,12 +51,12 @@ def get_pca_job(conf):
         "output_folder": os.path.join(setting_data["anl_data"], conf["uid"]),
         "uid": conf["uid"]}
     for idx, uid in enumerate(conf["expression"].split()):
-        genelist_data = get_genelist_data(uid)
-        exp_data = get_exp_data(genelist_data["tableName"])
-        job["expression_file"].append(fill_template("""{{"class": "File",
-                                                         "location": "{outputs[rpkm_isoforms][location]}",
-                                                         "format": "http://edamontology.org/format_3752"}}""", exp_data))
-        job["legend_name"].append(genelist_data["name"])
+        for genelist_data in connect_db.fetchall(f"SELECT tableName, name FROM genelist WHERE leaf=1 AND (parent_id like '{uid}' OR id like '{uid}')"):
+            exp_data = get_exp_data(genelist_data["tableName"])
+            job["expression_file"].append(fill_template("""{{"class": "File",
+                                                             "location": "{outputs[rpkm_isoforms][location]}",
+                                                             "format": "http://edamontology.org/format_3752"}}""", exp_data))
+            job["legend_name"].append(genelist_data["name"])
     return job
 
 
