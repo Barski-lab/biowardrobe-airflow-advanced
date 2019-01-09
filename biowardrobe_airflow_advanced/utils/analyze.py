@@ -70,7 +70,7 @@ def get_genelist_file(uid):
         connect_db = HookConnect()
         filename = os.path.join(connect_db.get_settings_data()["anl_data"], uid, uid+"_genelist.tsv")
 
-        data = connect_db.fetchall(f"""SELECT * FROM experiments.{genelist_data["tableName"]}""")
+        data = connect_db.fetchall(f"""SELECT * FROM experiments.`{genelist_data["tableName"]}`""")
         data_str = ""
         for idx, record in enumerate(data):
             if idx == 0:
