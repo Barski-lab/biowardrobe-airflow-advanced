@@ -56,7 +56,7 @@ steps:
       class: CommandLineTool
       requirements:
       - class: DockerRequirement
-        dockerPull: biowardrobe2/pca:v0.0.1
+        dockerPull: biowardrobe2/pca:v0.0.2
       inputs:
         expression_file:
           type: File[]
