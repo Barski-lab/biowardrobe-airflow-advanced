@@ -426,7 +426,7 @@ steps:
                   y = np.convolve(w / w.sum(), s, mode='same')
                   return y[b - 1:-(b - 1)]
               gb_df['smooth'] = pd.Series(smooth(gb_df['pos_tags'] + gb_df['neg_tags'], int(sys.argv[5])), index=gb_df.index)
-              td_df['smooth'] = pd.Series(smooth(td_df['pos_tags'] + td_df['neg_tags'], int(sys.argv[6])), index=td_df.index)
+              td_df['smooth'] = pd.Series(smooth(td_df['coverage'], int(sys.argv[6])), index=td_df.index)
               d = {
                   "heatmap":   hm_df.to_dict(orient="split"),
                   "genebody":  gb_df.to_dict(orient="split"),
