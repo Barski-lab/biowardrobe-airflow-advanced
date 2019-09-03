@@ -1,5 +1,5 @@
 import os
-from cwl_airflow_parser import CWLJobGatherer
+from cwl_airflow import CWLJobGatherer
 from biowardrobe_airflow_advanced.utils.upload import upload_deseq_results, update_genelist_table_for_deseq
 
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from cwl_airflow_parser.cwldag import CWLDAG
+from cwl_airflow.cwldag import CWLDAG
 from biowardrobe_airflow_advanced.utils.analyze import get_workflow
 
 

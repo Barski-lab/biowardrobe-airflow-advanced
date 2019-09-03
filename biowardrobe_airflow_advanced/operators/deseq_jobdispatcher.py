@@ -1,5 +1,5 @@
 import os
-from cwl_airflow_parser import CWLJobDispatcher
+from cwl_airflow import CWLJobDispatcher
 from biowardrobe_airflow_advanced.utils.analyze import get_deseq_job
 
 

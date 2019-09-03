@@ -1,5 +1,5 @@
 import os
-from cwl_airflow_parser import CWLJobGatherer
+from cwl_airflow import CWLJobGatherer
 from biowardrobe_airflow_advanced.utils.upload import update_atdp_table_for_heatmap, upload_atdp_results, update_genelist_table_for_atdp
 
 

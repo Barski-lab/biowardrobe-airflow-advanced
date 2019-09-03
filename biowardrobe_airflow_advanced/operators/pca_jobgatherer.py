@@ -1,6 +1,6 @@
 import os
 import json
-from cwl_airflow_parser import CWLJobGatherer
+from cwl_airflow import CWLJobGatherer
 from biowardrobe_airflow_advanced.utils.utilities import export_to_file
 
 
